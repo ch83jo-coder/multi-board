@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { ProfileMenu } from "@/components/layout/profile-menu";
+import { TopNavLinks } from "@/components/layout/top-nav-links";
 import { buttonStyles } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MaterialIcon } from "@/components/ui/material-icon";
@@ -28,20 +29,7 @@ export async function TopNavBar() {
           >
             Panmoa
           </Link>
-          <nav className="hidden h-16 items-center gap-6 md:flex">
-            <Link href="/" className="font-label-md text-label-md text-primary">
-              注目
-            </Link>
-            {boards.slice(0, 4).map((board) => (
-              <Link
-                key={board.id}
-                href={`/boards/${board.slug}`}
-                className="font-label-md text-label-md text-text-muted transition-colors hover:text-primary"
-              >
-                {board.name}
-              </Link>
-            ))}
-          </nav>
+          <TopNavLinks boards={boards.slice(0, 4)} />
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <form action="/search" className="relative hidden w-64 lg:block">
