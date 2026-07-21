@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Etoland | High-Density Information Exchange</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        .post-row-hover:hover {
+            background-color: #F7F9FA;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#fbf9f8",
+                      "border-subtle": "#E2E8F0",
+                      "primary-container": "#0055ff",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#303030",
+                      "on-primary-container": "#e3e6ff",
+                      "on-secondary-fixed": "#002201",
+                      "outline-variant": "#c3c5d9",
+                      "secondary-container": "#8ff780",
+                      "on-surface": "#1b1c1c",
+                      "on-error-container": "#93000a",
+                      "secondary": "#006e0c",
+                      "on-background": "#1b1c1c",
+                      "text-muted": "#64748B",
+                      "inverse-primary": "#b6c4ff",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed-dim": "#77dd6a",
+                      "on-tertiary-fixed-variant": "#872100",
+                      "primary": "#0041c8",
+                      "background": "#fbf9f8",
+                      "surface-variant": "#e4e2e1",
+                      "secondary-fixed": "#92fa83",
+                      "on-tertiary-fixed": "#3b0900",
+                      "surface-container": "#f0eded",
+                      "tertiary-container": "#c13301",
+                      "outline": "#737688",
+                      "surface-container-low": "#f6f3f2",
+                      "success-light": "#EBF7EB",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed": "#001551",
+                      "tertiary": "#972500",
+                      "tertiary-fixed-dim": "#ffb5a0",
+                      "primary-fixed-dim": "#b6c4ff",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#004dea",
+                      "inverse-on-surface": "#f3f0f0",
+                      "on-secondary-container": "#00730d",
+                      "on-tertiary-container": "#ffe1d9",
+                      "surface-container-highest": "#e4e2e1",
+                      "surface-bright": "#fbf9f8",
+                      "on-secondary-fixed-variant": "#005307",
+                      "on-primary": "#ffffff",
+                      "primary-fixed": "#dce1ff",
+                      "on-primary-fixed-variant": "#0039b3",
+                      "surface-container-high": "#eae8e7",
+                      "surface-dim": "#dcd9d9",
+                      "on-surface-variant": "#434656",
+                      "tertiary-fixed": "#ffdbd1",
+                      "surface-alt": "#F7F9FA"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "container-max-width": "1200px",
+                      "gutter": "16px",
+                      "margin-desktop": "24px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "headline-lg-mobile": ["Hanken Grotesk"],
+                      "label-sm": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "body-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-md": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface sticky top-0 z-50 border-b border-border-subtle h-16 flex items-center">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max-width mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-8">
+<a class="font-headline-lg text-headline-lg font-bold text-primary" href="#">Etoland</a>
+<!-- Nav Links -->
+<nav class="hidden md:flex gap-6 items-center h-16">
+<a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors" href="#">Hot</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-primary transition-colors" href="#">Humor</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-primary transition-colors" href="#">News</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-primary transition-colors" href="#">Sports</a>
+<a class="font-label-md text-label-md text-text-muted hover:text-primary transition-colors" href="#">Game</a>
+</nav>
+</div>
+<!-- Trailing Search & Icons -->
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<input class="bg-surface-container border-none rounded-lg font-body-md text-body-md px-4 py-2 w-64 focus:ring-1 focus:ring-primary" placeholder="Search discussions..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-text-muted">search</span>
+</div>
+<button class="p-2 text-text-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-text-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+<button class="md:hidden p-2 text-text-muted">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="max-w-container-max-width mx-auto px-margin-desktop py-gutter flex gap-gutter">
+<!-- SideNavBar (Left) -->
+<aside class="hidden xl:flex flex-col w-64 h-[calc(100vh-80px)] sticky top-20">
+<div class="bg-surface-alt rounded-xl p-gutter space-y-6 flex flex-col h-full">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary mb-1">Community Central</h2>
+<p class="font-body-sm text-body-sm text-text-muted">Trending now in Etoland</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    New Post
+                </button>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 font-headline-md text-headline-md text-primary font-bold hover:bg-surface-variant rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-md text-label-md">Rankings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-text-muted hover:bg-surface-variant rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-label-md text-label-md">Popular</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-text-muted hover:bg-surface-variant rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span class="font-label-md text-label-md">Announcements</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-text-muted hover:bg-surface-variant rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-label-md text-label-md">Community</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-text-muted hover:bg-surface-variant rounded-lg transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-border-subtle">
+<div class="flex items-center gap-3 p-3 bg-surface rounded-lg">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">U</div>
+<div class="overflow-hidden">
+<p class="font-label-md text-label-md truncate">User_9281</p>
+<p class="text-[10px] text-text-muted">1.2k Karma</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Feed (Center) -->
+<section class="flex-1 space-y-6">
+<!-- Trending Carousel/Bento -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+<div class="md:col-span-8 relative group cursor-pointer overflow-hidden rounded-xl h-64 bg-surface-alt border border-border-subtle">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="A high-resolution cinematic photo of a modern technological workspace with multiple glowing computer screens displaying complex data charts and forum threads. The lighting is dominated by professional primary blue hues against clean white surfaces, reflecting a corporate yet innovative atmosphere for a digital community. Soft shadows and shallow depth of field create a premium, news-portal feeling." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDLybuHUSJa9EXh1-r-eyhqbHDCBQgMkVtUhELLYqYWJKBAFCNLutuMPBhzRXnbc6zG9WoBANJj7Ka_fX90GUDlhSdGmh8wy-XEUZBBGB2-YG5d3zW1DCPNtyi8p8RuLco8q8LNhSxNFSTJJw36kTI9f0_KF2IztwtfdvlyYYTgWACJB5Xwwr0SMLV0MydAWzbqxPoDA45wlFwxFhAU5Po2RCtlQNv1Nbo-I7GcKmMqvg_q20Bt2A5O')"></div>
+<div class="absolute bottom-0 left-0 p-6 z-20 w-full">
+<span class="bg-primary text-white text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-sm mb-2 inline-block">Breaking News</span>
+<h1 class="text-white font-headline-lg text-headline-lg-mobile md:text-headline-lg leading-tight mb-2">Etoland 2.0 Launch: A New Era for Professional Discussion</h1>
+<p class="text-white/80 font-body-sm text-body-sm line-clamp-1">Explore the new architecture designed for high-density information exchange...</p>
+</div>
+</div>
+<div class="md:col-span-4 flex flex-col gap-4">
+<div class="flex-1 bg-primary-container p-5 rounded-xl text-on-primary-container relative overflow-hidden group cursor-pointer">
+<div class="relative z-10">
+<h3 class="font-headline-md text-headline-md mb-2">Weekly Humour Digest</h3>
+<p class="font-body-sm text-body-sm opacity-90">Top 10 memes that defined the industry this week.</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-2 -right-2 text-6xl opacity-20 transform -rotate-12 group-hover:rotate-0 transition-transform">sentiment_very_satisfied</span>
+</div>
+<div class="flex-1 bg-surface-container p-5 rounded-xl border border-border-subtle relative group cursor-pointer">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Poll of the Day</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Which framework are you prioritizing in 2024?</p>
+<div class="mt-4 flex gap-2">
+<div class="h-1 bg-primary rounded-full flex-1"></div>
+<div class="h-1 bg-border-subtle rounded-full flex-1"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Feed Filters -->
+<div class="flex items-center justify-between border-b border-border-subtle pb-4">
+<div class="flex gap-4">
+<button class="font-label-md text-label-md text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> Trending
+                    </button>
+<button class="font-label-md text-label-md text-text-muted hover:text-primary">Latest</button>
+<button class="font-label-md text-label-md text-text-muted hover:text-primary">Top Rated</button>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 bg-surface-container rounded-md text-text-muted"><span class="material-symbols-outlined text-sm">view_list</span></button>
+<button class="p-1.5 text-text-muted"><span class="material-symbols-outlined text-sm">grid_view</span></button>
+</div>
+</div>
+<!-- Post List -->
+<div class="space-y-0.5 bg-border-subtle rounded-xl overflow-hidden border border-border-subtle">
+<!-- Post Item 1 -->
+<div class="bg-surface p-4 flex gap-4 post-row-hover transition-colors cursor-pointer group">
+<div class="flex flex-col items-center gap-1 w-10 text-text-muted">
+<span class="material-symbols-outlined text-primary">expand_less</span>
+<span class="font-label-md text-label-md font-bold">4.2k</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-secondary uppercase bg-success-light px-1.5 rounded">Humor</span>
+<span class="text-[11px] text-text-muted">Posted by u/creative_soul • 2h ago</span>
+</div>
+<h2 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">The paradox of modern documentation: Reading 50 pages to find 1 line.</h2>
+<div class="flex items-center gap-4 pt-2">
+<div class="flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-sm">chat_bubble_outline</span>
+<span class="text-xs">128 Comments</span>
+</div>
+<div class="flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-sm">share</span>
+<span class="text-xs">Share</span>
+</div>
+</div>
+</div>
+<div class="hidden sm:block w-20 h-16 rounded overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist macro photograph of a vintage typewriter key, illuminated by soft blue office lighting. The aesthetic is professional and corporate, emphasizing tactile texture and precision. Part of a larger modern forum design for a technology-focused community." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8bNdCOwnNQJ5cbNNLAz7tMLkmCLLWHeC4H_gY8nH3Gwh3xN88604di650hdEFmajorSPUxeXlCtOUgGmo5kg_6dnX3gotV1zWPLwYds35JR5b41qJCwGPtpPjSD2TsaIlm_R3szWZMcMvSuLMxwnL_-WGGNs6hg80le0UWNcR6Uh88HnIiyYtTKiNiGZntCDrulBlorSJs5V8uc1Rq2t9dWcYRl_F1RaPJQ3H7w_AQbTfuFJIMFVY"/>
+</div>
+</div>
+<!-- Post Item 2 (Pinned/Alt background) -->
+<div class="bg-surface-alt p-4 flex gap-4 post-row-hover transition-colors cursor-pointer group">
+<div class="flex flex-col items-center gap-1 w-10 text-text-muted">
+<span class="material-symbols-outlined">expand_less</span>
+<span class="font-label-md text-label-md">12k</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-primary uppercase bg-primary-container/10 px-1.5 rounded">News</span>
+<span class="text-[11px] text-text-muted">Posted by u/admin • 5h ago</span>
+<span class="material-symbols-outlined text-primary text-xs" style="font-variation-settings: 'FILL' 1;">push_pin</span>
+</div>
+<h2 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">Global Connectivity Standards: 2025 Vision Document Released</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">A comprehensive breakdown of how international data exchanges will be structured over the next decade, focusing on decentralization and security protocols.</p>
+<div class="flex items-center gap-4 pt-2">
+<div class="flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-sm">chat_bubble_outline</span>
+<span class="text-xs">1.2k Comments</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Post Item 3 -->
+<div class="bg-surface p-4 flex gap-4 post-row-hover transition-colors cursor-pointer group">
+<div class="flex flex-col items-center gap-1 w-10 text-text-muted">
+<span class="material-symbols-outlined">expand_less</span>
+<span class="font-label-md text-label-md">840</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-text-muted uppercase bg-surface-variant px-1.5 rounded">Tech</span>
+<span class="text-[11px] text-text-muted">Posted by u/quantum_dev • 8h ago</span>
+</div>
+<h2 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">Is Quantum Computing finally reaching its 'Netscape' moment?</h2>
+<div class="flex items-center gap-4 pt-2">
+<div class="flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-sm">chat_bubble_outline</span>
+<span class="text-xs">45 Comments</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Post Item 4 -->
+<div class="bg-surface p-4 flex gap-4 post-row-hover transition-colors cursor-pointer group">
+<div class="flex flex-col items-center gap-1 w-10 text-text-muted">
+<span class="material-symbols-outlined">expand_less</span>
+<span class="font-label-md text-label-md">3.1k</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-secondary-fixed-dim uppercase bg-secondary-container/10 px-1.5 rounded">Game</span>
+<span class="text-[11px] text-text-muted">Posted by u/pixel_hunter • 12h ago</span>
+</div>
+<h2 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">Why indie titles are winning the immersion war this year.</h2>
+<div class="flex items-center gap-4 pt-2">
+<div class="flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-sm">chat_bubble_outline</span>
+<span class="text-xs">289 Comments</span>
+</div>
+</div>
+</div>
+<div class="hidden sm:block w-20 h-16 rounded overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="An abstract, high-contrast digital art piece representing virtual reality and gaming. Glowing primary blue vectors form a landscape of geometric mountains against a deep black background. The style is sharp, corporate-futurist, and uses soft blue atmospheric lighting to create depth. Perfect for a tech-heavy community portal header or card." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSrZA7kVy0dWVxHaBAFzTCveyagJDx0J5YpR-gJEyB-PrjFsUYfKSHqHT0z_sOd8tMV_ehVAtTSeVyvFTNNxbxjC1NcVWV49P-HNHHStOaf5W4aP2qUnri_6YUBHkuTRToARG8P2JlnSr72ZhCO7QGOlJbsIp8ewYGFDdETje8cPZBzvu2lh-KPxQhXNB3hwRVcFTvOQjBznLaH7kMw33KrX5IciCRvB50CR0etJ6zt2neQFKSz6ZA"/>
+</div>
+</div>
+</div>
+<!-- Load More -->
+<button class="w-full py-4 border border-border-subtle rounded-xl font-label-md text-label-md text-primary hover:bg-surface-container transition-colors">
+                Load More Discussions
+            </button>
+</section>
+<!-- Sidebar (Right) -->
+<aside class="hidden lg:flex flex-col w-80 space-y-gutter">
+<!-- Community Rankings -->
+<div class="bg-surface border border-border-subtle rounded-xl overflow-hidden">
+<div class="bg-primary text-on-primary p-4">
+<h3 class="font-headline-md text-headline-md">Top Communities</h3>
+</div>
+<div class="p-2 space-y-1">
+<div class="flex items-center justify-between p-2 hover:bg-surface-alt rounded-lg transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="font-bold text-text-muted text-sm w-4">1</span>
+<div class="w-8 h-8 rounded-full bg-secondary-container"></div>
+<span class="font-label-md text-label-md group-hover:text-primary transition-colors">r/InvestmentStrategies</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[16px]">trending_up</span>
+</div>
+<div class="flex items-center justify-between p-2 hover:bg-surface-alt rounded-lg transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="font-bold text-text-muted text-sm w-4">2</span>
+<div class="w-8 h-8 rounded-full bg-primary-container"></div>
+<span class="font-label-md text-label-md group-hover:text-primary transition-colors">r/FutureTech</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-[16px]">trending_up</span>
+</div>
+<div class="flex items-center justify-between p-2 hover:bg-surface-alt rounded-lg transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="font-bold text-text-muted text-sm w-4">3</span>
+<div class="w-8 h-8 rounded-full bg-tertiary-container"></div>
+<span class="font-label-md text-label-md group-hover:text-primary transition-colors">r/GlobalEthics</span>
+</div>
+<span class="material-symbols-outlined text-error text-[16px]">trending_down</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low border-t border-border-subtle">
+<button class="w-full py-1.5 bg-surface text-primary border border-primary rounded font-label-md text-label-md hover:bg-primary hover:text-white transition-all">View All</button>
+</div>
+</div>
+<!-- Advertisement / Promo -->
+<div class="bg-surface-alt border border-border-subtle rounded-xl p-4 space-y-3">
+<span class="text-[9px] font-bold text-text-muted uppercase tracking-widest">Sponsored</span>
+<div class="rounded-lg overflow-hidden h-40 bg-white relative group cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="A premium high-end promotional image for a corporate analytics software. Clean data visualization dashboards are displayed on a sleek, thin laptop in a bright, sun-drenched architectural space with marble and glass. Primary blue accents pop against a neutral white and gray palette. The image conveys trust, efficiency, and professional reliability in a corporate setting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCTq7ahm7mJp3ePdPHLiPyk-RHVFdPhnMNH8RnNoI5abIveNySCgxWTrFOTHqsULGmbWj3u77ALFxYE_3LTbp8gMbYKU3DMwG7bdK5t5HBfqdAmcua1eAJSmhW1KigmwA41JlUlICMJQqQmZsaIbl-maP_EhiyL5B_RccjQEUAqKzXdWgzfVxkxLuciOYdkY-jBFxx6xOz2Nfi7omR8H2vkKHI-EbZu4GowOtW8R5bWscD-8qPap_H9')"></div>
+</div>
+<h4 class="font-label-md text-label-md leading-tight">Master your workflow with EtoAnalytics Pro.</h4>
+<p class="font-body-sm text-body-sm text-text-muted">Special discount for Etoland members. Sign up today.</p>
+</div>
+<!-- Trending Keywords -->
+<div class="bg-surface border border-border-subtle rounded-xl p-4">
+<h3 class="font-label-md text-label-md text-text-muted uppercase mb-4 border-b border-border-subtle pb-2">Trending Keywords</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs text-on-surface font-medium hover:bg-primary-container hover:text-white cursor-pointer transition-colors">#AIRegulation</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs text-on-surface font-medium hover:bg-primary-container hover:text-white cursor-pointer transition-colors">#Web3Update</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs text-on-surface font-medium hover:bg-primary-container hover:text-white cursor-pointer transition-colors">#GlobalMarket</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs text-on-surface font-medium hover:bg-primary-container hover:text-white cursor-pointer transition-colors">#SustainableTech</span>
+<span class="bg-surface-container-high px-2 py-1 rounded text-xs text-on-surface font-medium hover:bg-primary-container hover:text-white cursor-pointer transition-colors">#RemoteWork2025</span>
+</div>
+</div>
+<!-- Sticky Footer Segment -->
+<footer class="pt-4 sticky top-24">
+<div class="flex flex-wrap gap-x-4 gap-y-1 mb-4">
+<a class="font-label-sm text-label-sm text-text-muted hover:underline" href="#">About</a>
+<a class="font-label-sm text-label-sm text-text-muted hover:underline" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-text-muted hover:underline" href="#">User Agreement</a>
+<a class="font-label-sm text-label-sm text-text-muted hover:underline" href="#">Content Policy</a>
+<a class="font-label-sm text-label-sm text-text-muted hover:underline" href="#">Contact</a>
+</div>
+<p class="font-label-sm text-label-sm text-text-muted opacity-60">© 2024 Etoland Forum. High-density information exchange.</p>
+</footer>
+</aside>
+</main>
+<!-- Bottom Nav for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border-subtle h-16 flex items-center justify-around px-gutter z-50">
+<button class="flex flex-col items-center gap-0.5 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-0.5 text-text-muted">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-bold">Explore</span>
+</button>
+<button class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white -mt-8 shadow-lg">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="flex flex-col items-center gap-0.5 text-text-muted">
+<span class="material-symbols-outlined">chat</span>
+<span class="text-[10px] font-bold">Chat</span>
+</button>
+<button class="flex flex-col items-center gap-0.5 text-text-muted">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px] font-bold">Inbox</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interactions
+        document.querySelectorAll('.post-row-hover').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.transform = 'translateX(4px)';
+                item.style.transition = 'transform 0.2s ease-out';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'translateX(0px)';
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.classList.add('w-80');
+                searchInput.classList.remove('w-64');
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.classList.remove('w-80');
+                searchInput.classList.add('w-64');
+            });
+        }
+    </script>
+</body></html>
