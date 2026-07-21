@@ -38,15 +38,6 @@ export function RightSidebar({ boards }: { boards: Board[] }) {
           ))}
         </div>
       </Card>
-      <Card className="overflow-hidden bg-primary-fixed p-5">
-        <span className="font-label-sm text-primary">広告</span>
-        <h3 className="mt-3 font-headline-md text-lg font-semibold text-on-primary-fixed">
-          スクロールより、会話を。
-        </h3>
-        <p className="mt-2 text-body-sm text-on-primary-fixed-variant">
-          厳選された話題と、質の高いコミュニティに参加しましょう。
-        </p>
-      </Card>
       <Card className="p-4">
         <h2 className="mb-3 font-headline-md text-base font-semibold">
           トレンドキーワード
@@ -59,7 +50,12 @@ export function RightSidebar({ boards }: { boards: Board[] }) {
             "#プレミアリーグ",
             "#インディーゲーム",
           ].map((tag) => (
-            <Chip key={tag}>{tag}</Chip>
+            <Link
+              key={tag}
+              href={`/search?q=${encodeURIComponent(tag.slice(1))}`}
+            >
+              <Chip>{tag}</Chip>
+            </Link>
           ))}
         </div>
       </Card>

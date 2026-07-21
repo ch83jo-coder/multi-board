@@ -8,17 +8,28 @@ export function VoteButtons({
   postId,
   slug,
   count,
+  initialVote,
 }: {
   postId: string;
   slug: string;
   count: number;
+  initialVote: 1 | -1 | null;
 }) {
   const [message, setMessage] = useState("");
+  const [currentVote, setCurrentVote] = useState(initialVote);
+  const [currentCount, setCurrentCount] = useState(count);
   const [pending, startTransition] = useTransition();
   const vote = (value: 1 | -1) =>
     startTransition(async () => {
       const result = await votePost(postId, slug, value);
       setMessage(result.error ?? result.success ?? "");
+      if (!result.error && "vote" in result) {
+        const nextVote = result.vote ?? null;
+        setCurrentCount(
+          (previous) => previous + (nextVote ?? 0) - (currentVote ?? 0),
+        );
+        setCurrentVote(nextVote);
+      }
     });
   return (
     <div className="flex flex-col items-center gap-2">
@@ -27,17 +38,19 @@ export function VoteButtons({
         disabled={pending}
         onClick={() => vote(1)}
         aria-label="賛成票を入れる"
-        className="rounded border border-border-subtle p-2 text-primary hover:bg-primary-fixed"
+        aria-pressed={currentVote === 1}
+        className={`rounded border border-border-subtle p-2 hover:bg-primary-fixed ${currentVote === 1 ? "bg-primary-fixed text-primary" : "text-text-muted"}`}
       >
         <MaterialIcon name="expand_less" />
       </button>
-      <strong className="text-lg">{count}</strong>
+      <strong className="text-lg">{currentCount}</strong>
       <button
         type="button"
         disabled={pending}
         onClick={() => vote(-1)}
         aria-label="反対票を入れる"
-        className="rounded border border-border-subtle p-2 text-text-muted hover:bg-surface-alt"
+        aria-pressed={currentVote === -1}
+        className={`rounded border border-border-subtle p-2 hover:bg-primary-fixed ${currentVote === -1 ? "bg-primary-fixed text-primary" : "text-text-muted"}`}
       >
         <MaterialIcon name="expand_more" />
       </button>

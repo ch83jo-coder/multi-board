@@ -9,7 +9,9 @@ export function FeedRow({ post }: { post: Post }) {
   return (
     <article className="group flex gap-4 bg-white p-4 transition-colors hover:bg-surface-alt">
       <div className="flex w-11 shrink-0 flex-col items-center gap-0.5 text-text-muted">
-        <MaterialIcon name="expand_less" className="text-primary" />
+        <Link href={href} aria-label={`${post.title}を開く`}>
+          <MaterialIcon name="expand_less" className="text-primary" />
+        </Link>
         <span className="font-label-md text-label-md font-bold">
           {formatCompact(post.vote_count)}
         </span>

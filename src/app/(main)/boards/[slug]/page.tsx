@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Pagination } from "@/components/ui/pagination";
-import { getBoard, getBoardPosts, parseBoardSort } from "@/lib/data";
+import {
+  getBoard,
+  getBoardBestPosts,
+  getBoardPostCount,
+  getBoardPosts,
+  POSTS_PER_PAGE,
+  parseBoardSort,
+} from "@/lib/data";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -22,14 +29,19 @@ export default async function BoardPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const query = await searchParams;
   const parsedPage = Number(query.page ?? 1);
-  const page = Number.isFinite(parsedPage)
+  const requestedPage = Number.isFinite(parsedPage)
     ? Math.max(1, Math.floor(parsedPage))
     : 1;
   const sort = parseBoardSort(query.sort);
   const board = await getBoard(slug);
   if (!board) notFound();
+  const [total, weekly] = await Promise.all([
+    getBoardPostCount(board.id),
+    getBoardBestPosts(board.id),
+  ]);
+  const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+  const page = Math.min(requestedPage, pages);
   const posts = await getBoardPosts(board.id, page, sort);
-  const weekly = posts.filter((post) => !post.is_pinned).slice(0, 3);
   return (
     <div className="space-y-7">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -80,7 +92,12 @@ export default async function BoardPage({ params, searchParams }: Props) {
         <div className="divide-y divide-border-subtle">
           {posts.length ? (
             posts.map((post, index) => (
-              <BoardRow key={post.id} post={post} index={index} slug={slug} />
+              <BoardRow
+                key={post.id}
+                post={post}
+                number={(page - 1) * POSTS_PER_PAGE + index + 1}
+                slug={slug}
+              />
             ))
           ) : (
             <div className="px-6 py-14 text-center text-body-md text-text-muted">
@@ -89,34 +106,44 @@ export default async function BoardPage({ params, searchParams }: Props) {
           )}
         </div>
       </Card>
-      <Pagination current={page} sort={sort === "latest" ? undefined : sort} />
+      <Pagination
+        current={page}
+        pages={pages}
+        sort={sort === "latest" ? undefined : sort}
+      />
       <section>
         <div className="mb-4 flex items-center gap-2">
           <MaterialIcon name="workspace_premium" className="text-primary" />
           <h2 className="font-headline-md text-headline-md">今週のベスト</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {weekly.map((post, index) => (
-            <Link
-              key={post.id}
-              href={`/boards/${slug}/${post.id}`}
-              className={`min-h-36 rounded-lg border border-border-subtle p-5 transition-transform hover:-translate-y-0.5 ${index === 0 ? "bg-primary text-white" : "bg-white"}`}
-            >
-              <span
-                className={`font-label-sm ${index === 0 ? "text-white/70" : "text-primary"}`}
+          {weekly.length ? (
+            weekly.map((post, index) => (
+              <Link
+                key={post.id}
+                href={`/boards/${slug}/${post.id}`}
+                className={`min-h-36 rounded-lg border border-border-subtle p-5 transition-transform hover:-translate-y-0.5 ${index === 0 ? "bg-primary text-white" : "bg-white"}`}
               >
-                第{index + 1}位
-              </span>
-              <h3 className="mt-3 line-clamp-2 font-headline-md text-lg font-semibold">
-                {post.title}
-              </h3>
-              <p
-                className={`mt-3 text-body-sm ${index === 0 ? "text-white/70" : "text-text-muted"}`}
-              >
-                投票 {post.vote_count}件 · コメント {post.comment_count}件
-              </p>
-            </Link>
-          ))}
+                <span
+                  className={`font-label-sm ${index === 0 ? "text-white/70" : "text-primary"}`}
+                >
+                  第{index + 1}位
+                </span>
+                <h3 className="mt-3 line-clamp-2 font-headline-md text-lg font-semibold">
+                  {post.title}
+                </h3>
+                <p
+                  className={`mt-3 text-body-sm ${index === 0 ? "text-white/70" : "text-text-muted"}`}
+                >
+                  投票 {post.vote_count}件 · コメント {post.comment_count}件
+                </p>
+              </Link>
+            ))
+          ) : (
+            <p className="rounded-lg border border-border-subtle bg-white p-5 text-body-sm text-text-muted md:col-span-3">
+              今週のベスト投稿はまだありません。
+            </p>
+          )}
         </div>
       </section>
     </div>

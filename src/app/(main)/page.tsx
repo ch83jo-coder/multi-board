@@ -3,7 +3,14 @@ import { Hero } from "@/components/home/hero";
 import { RightSidebar } from "@/components/home/right-sidebar";
 import { FeedRow } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
-import { getBoards, getHomePosts, parseHomeSort } from "@/lib/data";
+import { Pagination } from "@/components/ui/pagination";
+import {
+  getBoards,
+  getHomePostCount,
+  getHomePosts,
+  POSTS_PER_PAGE,
+  parseHomeSort,
+} from "@/lib/data";
 import type { HomeSort } from "@/lib/types";
 
 const sortTabs: { value: HomeSort; label: string; icon?: string }[] = [
@@ -15,16 +22,27 @@ const sortTabs: { value: HomeSort; label: string; icon?: string }[] = [
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; page?: string }>;
 }) {
-  const sort = parseHomeSort((await searchParams).sort);
-  const [posts, boards] = await Promise.all([getHomePosts(sort), getBoards()]);
+  const query = await searchParams;
+  const sort = parseHomeSort(query.sort);
+  const parsedPage = Number(query.page ?? 1);
+  const requestedPage = Number.isFinite(parsedPage)
+    ? Math.max(1, Math.floor(parsedPage))
+    : 1;
+  const [total, boards] = await Promise.all([
+    getHomePostCount(sort),
+    getBoards(),
+  ]);
+  const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+  const page = Math.min(requestedPage, pages);
+  const posts = await getHomePosts(sort, page);
   const heroPost = posts.find((post) => post.id === "launch") ?? posts[0];
   return (
     <div className="flex gap-gutter">
       <div className="min-w-0 flex-1 space-y-6">
-        <Hero post={heroPost} />
-        <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+        <Hero post={heroPost} boards={boards} />
+        <div className="flex items-center border-b border-border-subtle pb-4">
           <div className="flex gap-4">
             {sortTabs.map((tab) => (
               <Link
@@ -40,7 +58,6 @@ export default async function HomePage({
               </Link>
             ))}
           </div>
-          <MaterialIcon name="view_list" className="text-text-muted" />
         </div>
         <section className="divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle bg-border-subtle">
           {posts.length ? (
@@ -51,6 +68,11 @@ export default async function HomePage({
             </div>
           )}
         </section>
+        <Pagination
+          current={page}
+          pages={pages}
+          sort={sort === "trending" ? undefined : sort}
+        />
       </div>
       <RightSidebar boards={boards} />
     </div>

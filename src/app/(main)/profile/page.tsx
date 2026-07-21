@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/actions/auth";
+import { ProfileForm } from "@/components/forms/profile-form";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -73,6 +74,13 @@ export default async function ProfilePage() {
           </Card>
         ))}
       </section>
+
+      <Card className="p-5 md:p-7">
+        <h2 className="mb-4 font-headline-md text-headline-md">
+          プロフィールを編集
+        </h2>
+        <ProfileForm username={viewer.username} />
+      </Card>
 
       <section>
         <div className="mb-4 flex items-center gap-2">

@@ -14,7 +14,7 @@ export default async function EditPage({
     getPost(postId),
     getViewer(),
   ]);
-  if (!board || !post) notFound();
+  if (!board || !post || post.board?.slug !== slug) notFound();
   if (!viewer) redirect(`/login?next=/boards/${slug}/${postId}/edit`);
   if (viewer.id !== post.author_id && viewer.role !== "admin")
     redirect(`/boards/${slug}/${postId}`);

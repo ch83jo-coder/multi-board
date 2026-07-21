@@ -15,6 +15,7 @@ export async function login(
     };
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const requestedNext = String(formData.get("next") ?? "");
   if (!email || password.length < 6)
     return {
       error: "メールアドレスと6文字以上のパスワードを入力してください。",
@@ -22,7 +23,19 @@ export async function login(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "ログイン情報を確認してください。" };
-  redirect("/");
+  redirect(getSafeNextPath(requestedNext));
+}
+
+function getSafeNextPath(value: string) {
+  if (!value.startsWith("/") || value.startsWith("//")) return "/";
+  try {
+    const parsed = new URL(value, "http://panmoa.local");
+    return parsed.origin === "http://panmoa.local"
+      ? `${parsed.pathname}${parsed.search}${parsed.hash}`
+      : "/";
+  } catch {
+    return "/";
+  }
 }
 
 export async function signup(

@@ -8,7 +8,7 @@ import { MaterialIcon } from "@/components/ui/material-icon";
 import { getBoards, getViewer } from "@/lib/data";
 
 export default async function AdminBoardsPage() {
-  const [viewer, boards] = await Promise.all([getViewer(), getBoards()]);
+  const [viewer, boards] = await Promise.all([getViewer(), getBoards(true)]);
   if (!viewer) redirect("/login");
   if (viewer.role !== "admin") redirect("/");
   return (
@@ -36,20 +36,23 @@ export default async function AdminBoardsPage() {
           </div>
           <div className="divide-y divide-border-subtle">
             {boards.map((board) => (
-              <div key={board.id} className="flex items-center gap-4 px-5 py-4">
-                <MaterialIcon name={board.icon} className="text-primary" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">
+              <div key={board.id} className="space-y-4 px-5 py-5">
+                <div className="flex items-center gap-3">
+                  <MaterialIcon name={board.icon} className="text-primary" />
+                  <p className="flex-1 font-semibold">
                     {board.name}{" "}
                     <span className="font-normal text-text-muted">
                       /{board.slug}
                     </span>
                   </p>
-                  <p className="truncate text-body-sm text-text-muted">
-                    {board.description}
-                  </p>
+                  <span
+                    className={`rounded px-2 py-1 text-label-sm ${board.is_active ? "bg-success-light text-secondary" : "bg-surface-container text-text-muted"}`}
+                  >
+                    {board.is_active ? "有効" : "無効"}
+                  </span>
                 </div>
-                <form action={toggleBoard}>
+                <BoardForm board={board} />
+                <form action={toggleBoard} className="flex justify-end">
                   <input type="hidden" name="id" value={board.id} />
                   <input
                     type="hidden"

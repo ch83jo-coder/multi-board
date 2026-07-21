@@ -42,9 +42,10 @@ export async function TopNavBar() {
           </nav>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
-          <form action="/" className="relative hidden lg:block">
+          <form action="/search" className="relative hidden lg:block">
             <input
               name="q"
+              aria-label="投稿を検索"
               className="w-64 rounded border border-transparent bg-surface-container px-4 py-2 pr-10 text-body-md outline-none focus:border-primary"
               placeholder="投稿を検索..."
             />

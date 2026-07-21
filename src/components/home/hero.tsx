@@ -1,9 +1,18 @@
 import Link from "next/link";
 import { MaterialIcon } from "@/components/ui/material-icon";
-import type { Post } from "@/lib/types";
+import type { Board, Post } from "@/lib/types";
 
-export function Hero({ post }: { post?: Post }) {
-  const href = post ? `/boards/${post.board?.slug}/${post.id}` : "/boards/news";
+export function Hero({ post, boards }: { post?: Post; boards: Board[] }) {
+  const firstBoard = boards[0];
+  const featuredBoard =
+    boards.find((board) => board.slug === "humor") ?? firstBoard;
+  const secondaryBoard =
+    boards.find((board) => board.slug === "game") ?? boards[1] ?? firstBoard;
+  const href = post?.board
+    ? `/boards/${post.board.slug}/${post.id}`
+    : firstBoard
+      ? `/boards/${firstBoard.slug}`
+      : "/";
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-12">
       <Link
@@ -26,12 +35,14 @@ export function Hero({ post }: { post?: Post }) {
       </Link>
       <div className="flex flex-col gap-4 md:col-span-4">
         <Link
-          href="/boards/humor"
+          href={featuredBoard ? `/boards/${featuredBoard.slug}` : "/"}
           className="group relative flex-1 overflow-hidden rounded-lg bg-primary-container p-5 text-on-primary-container"
         >
-          <h2 className="font-headline-md text-headline-md">今週のユーモア</h2>
+          <h2 className="font-headline-md text-headline-md">
+            今週の{featuredBoard?.name ?? "掲示板"}
+          </h2>
           <p className="mt-2 text-body-sm opacity-90">
-            今週話題になった会話とジョークをまとめて紹介します。
+            今週話題になった投稿をまとめてチェックしましょう。
           </p>
           <MaterialIcon
             name="sentiment_very_satisfied"
@@ -39,19 +50,19 @@ export function Hero({ post }: { post?: Post }) {
           />
         </Link>
         <Link
-          href="/boards/game"
+          href={secondaryBoard ? `/boards/${secondaryBoard.slug}` : "/"}
           className="flex-1 rounded-lg border border-border-subtle bg-surface-container p-5"
         >
           <h2 className="font-headline-md text-headline-md text-primary">
-            今日の投票
+            {secondaryBoard?.name ?? "掲示板"}
           </h2>
           <p className="mt-2 text-body-sm text-on-surface-variant">
-            いま最も重視しているフレームワークは？
+            最新の投稿と議論をチェックしましょう。
           </p>
-          <div className="mt-4 flex gap-2">
-            <div className="h-1 flex-[2] rounded-full bg-primary" />
-            <div className="h-1 flex-1 rounded-full bg-border-subtle" />
-          </div>
+          <span className="mt-4 inline-flex items-center gap-1 font-label-md text-primary">
+            掲示板へ
+            <MaterialIcon name="arrow_forward" className="text-[16px]" />
+          </span>
         </Link>
       </div>
     </section>

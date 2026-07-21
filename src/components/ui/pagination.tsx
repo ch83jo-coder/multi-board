@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Pagination({
   current = 1,
-  pages = 5,
+  pages = 1,
   sort,
 }: {
   current?: number;

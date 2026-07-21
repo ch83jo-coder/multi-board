@@ -2,7 +2,12 @@ import Link from "next/link";
 import { AuthForm } from "@/components/forms/auth-form";
 import { Card } from "@/components/ui/card";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
   return (
     <Card className="w-full max-w-md p-7">
       <div className="mb-7 text-center">
@@ -13,7 +18,7 @@ export default function LoginPage() {
           Panmoaアカウントでコミュニティに参加しましょう。
         </p>
       </div>
-      <AuthForm mode="login" />
+      <AuthForm mode="login" nextPath={next} />
       <p className="mt-6 text-center text-body-sm text-text-muted">
         アカウントをお持ちでないですか？{" "}
         <Link href="/signup" className="font-semibold text-primary">

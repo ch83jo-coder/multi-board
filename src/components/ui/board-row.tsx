@@ -5,11 +5,11 @@ import type { Post } from "@/lib/types";
 
 export function BoardRow({
   post,
-  index,
+  number,
   slug,
 }: {
   post: Post;
-  index: number;
+  number: number;
   slug: string;
 }) {
   return (
@@ -19,7 +19,7 @@ export function BoardRow({
       <div
         className={`text-center text-body-sm ${post.is_pinned ? "font-bold text-secondary" : "text-text-muted"}`}
       >
-        {post.is_pinned ? "固定" : 9822 - index}
+        {post.is_pinned ? "固定" : number}
       </div>
       <div className="flex min-w-0 items-center gap-2">
         <Link

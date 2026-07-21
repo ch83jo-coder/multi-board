@@ -7,10 +7,8 @@ export async function SideNav() {
   const [boards, viewer] = await Promise.all([getBoards(), getViewer()]);
   const writeHref = boards[0] ? `/boards/${boards[0].slug}/write` : "/login";
   const links: [string, string, string][] = [
-    ["leaderboard", "ランキング", "/"],
+    ["leaderboard", "ランキング", "/?sort=top"],
     ["trending_up", "人気", "/"],
-    ["campaign", "お知らせ", "/"],
-    ["groups", "コミュニティ", "/"],
   ];
   if (viewer?.role === "admin")
     links.push(["settings", "設定", "/admin/boards"]);

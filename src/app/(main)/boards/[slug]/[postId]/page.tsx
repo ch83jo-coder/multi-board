@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { deletePost } from "@/app/actions/posts";
+import { deletePost, toggleNotice, togglePin } from "@/app/actions/posts";
+import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
 import { VoteButtons } from "@/components/forms/vote-buttons";
 import { Avatar } from "@/components/ui/avatar";
@@ -9,20 +11,37 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDate } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
-import { getComments, getPost, getViewer } from "@/lib/data";
+import {
+  getComments,
+  getMyVote,
+  getPost,
+  getViewer,
+  incrementViewCount,
+} from "@/lib/data";
 
-export default async function PostPage({
-  params,
-}: {
+type Props = {
   params: Promise<{ slug: string; postId: string }>;
-}) {
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, postId } = await params;
-  const [post, comments, viewer] = await Promise.all([
+  const post = await getPost(postId);
+  return {
+    title: post?.board?.slug === slug ? post.title : "投稿",
+    description: post?.content.slice(0, 120),
+  };
+}
+
+export default async function PostPage({ params }: Props) {
+  const { slug, postId } = await params;
+  const [post, comments, viewer, initialVote] = await Promise.all([
     getPost(postId),
     getComments(postId),
     getViewer(),
+    getMyVote(postId),
   ]);
   if (!post || post.board?.slug !== slug) notFound();
+  const viewCount = (await incrementViewCount(postId)) ?? post.view_count;
   const canEdit =
     viewer && (viewer.id === post.author_id || viewer.role === "admin");
   return (
@@ -42,9 +61,14 @@ export default async function PostPage({
                 お知らせ
               </span>
             )}
+            {post.is_pinned && (
+              <span className="rounded bg-primary px-2 py-0.5 font-label-sm text-white">
+                固定
+              </span>
+            )}
             <span>{formatDate(post.created_at)}</span>
             <span>·</span>
-            <span>閲覧 {post.view_count}回</span>
+            <span>閲覧 {viewCount}回</span>
           </div>
           <h1 className="mt-3 font-headline-lg text-headline-lg-mobile md:text-headline-lg">
             {post.title}
@@ -63,8 +87,11 @@ export default async function PostPage({
             </div>
             {canEdit && (
               <div className="flex gap-2">
-                <Link href={`/boards/${slug}/${postId}/edit`}>
-                  <Button variant="ghost">編集</Button>
+                <Link
+                  href={`/boards/${slug}/${postId}/edit`}
+                  className="inline-flex min-h-10 items-center justify-center rounded border border-border-subtle bg-white px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-alt"
+                >
+                  編集
                 </Link>
                 <form action={deletePost}>
                   <input type="hidden" name="postId" value={postId} />
@@ -76,9 +103,42 @@ export default async function PostPage({
               </div>
             )}
           </div>
+          {viewer?.role === "admin" && (
+            <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-border-subtle pt-4">
+              <form action={togglePin}>
+                <input type="hidden" name="postId" value={postId} />
+                <input type="hidden" name="slug" value={slug} />
+                <input
+                  type="hidden"
+                  name="active"
+                  value={String(post.is_pinned)}
+                />
+                <Button type="submit" variant="ghost">
+                  {post.is_pinned ? "固定を解除" : "固定する"}
+                </Button>
+              </form>
+              <form action={toggleNotice}>
+                <input type="hidden" name="postId" value={postId} />
+                <input type="hidden" name="slug" value={slug} />
+                <input
+                  type="hidden"
+                  name="active"
+                  value={String(post.is_notice)}
+                />
+                <Button type="submit" variant="ghost">
+                  {post.is_notice ? "お知らせを解除" : "お知らせに設定"}
+                </Button>
+              </form>
+            </div>
+          )}
         </header>
         <div className="flex gap-5 p-5 md:p-7">
-          <VoteButtons postId={postId} slug={slug} count={post.vote_count} />
+          <VoteButtons
+            postId={postId}
+            slug={slug}
+            count={post.vote_count}
+            initialVote={initialVote}
+          />
           <article className="min-w-0 flex-1 text-body-lg leading-7 text-on-surface-variant">
             {post.thumbnail_url && (
               <figure className="mb-6 overflow-hidden rounded-lg border border-border-subtle bg-surface-container">
@@ -105,28 +165,17 @@ export default async function PostPage({
         <div className="divide-y divide-border-subtle border-y border-border-subtle">
           {comments.length ? (
             comments.map((comment) => (
-              <div
+              <CommentItem
                 key={comment.id}
-                className={`flex gap-3 py-4 ${comment.parent_id ? "ml-8 border-l-2 border-primary-fixed pl-4" : ""}`}
-              >
-                <Avatar
-                  username={comment.author?.username ?? "メンバー"}
-                  size="sm"
-                />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <strong className="text-body-sm">
-                      {comment.author?.username ?? "メンバー"}
-                    </strong>
-                    <span className="text-label-sm text-text-muted">
-                      {formatDate(comment.created_at)}
-                    </span>
-                  </div>
-                  <p className="mt-1 whitespace-pre-wrap text-body-md text-on-surface-variant">
-                    {comment.content}
-                  </p>
-                </div>
-              </div>
+                comment={comment}
+                postId={postId}
+                slug={slug}
+                canDelete={Boolean(
+                  viewer &&
+                    (viewer.id === comment.author_id ||
+                      viewer.role === "admin"),
+                )}
+              />
             ))
           ) : (
             <p className="py-8 text-center text-body-md text-text-muted">

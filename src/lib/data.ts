@@ -17,6 +17,8 @@ import type {
   Profile,
 } from "@/lib/types";
 
+export const POSTS_PER_PAGE = 20;
+
 export function parseHomeSort(value?: string): HomeSort {
   return value === "latest" || value === "top" ? value : "trending";
 }
@@ -35,34 +37,59 @@ function logQueryError(
   );
 }
 
-export async function getBoards(): Promise<Board[]> {
-  if (!hasSupabaseEnv()) return demoBoards;
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("boards")
-    .select("*")
-    .eq("is_active", true)
-    .order("sort_order");
-  if (error) {
-    logQueryError("getBoards", error);
-    return [];
+function orderComments(comments: Comment[]) {
+  const replies = new Map<string, Comment[]>();
+  for (const comment of comments) {
+    if (!comment.parent_id) continue;
+    const group = replies.get(comment.parent_id) ?? [];
+    group.push(comment);
+    replies.set(comment.parent_id, group);
   }
-  return data as Board[];
+  return comments
+    .filter((comment) => !comment.parent_id)
+    .flatMap((comment) => [comment, ...(replies.get(comment.id) ?? [])]);
 }
+
+export const getBoards = cache(
+  async (includeInactive = false): Promise<Board[]> => {
+    if (!hasSupabaseEnv())
+      return includeInactive
+        ? [...demoBoards]
+        : demoBoards.filter((board) => board.is_active);
+    const supabase = await createClient();
+    let query = supabase.from("boards").select("*");
+    if (!includeInactive) query = query.eq("is_active", true);
+    const { data, error } = await query.order("sort_order");
+    if (error) {
+      logQueryError("getBoards", error);
+      return [];
+    }
+    return data as Board[];
+  },
+);
 
 export async function getHomePosts(
   sort: HomeSort = "trending",
+  page = 1,
 ): Promise<Post[]> {
   if (!hasSupabaseEnv()) {
     const posts = [...demoPosts];
-    if (sort === "latest")
-      return posts.sort(
-        (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
-      );
-    const ranked = posts.sort((a, b) => b.vote_count - a.vote_count);
-    if (sort === "top") return ranked;
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return ranked.filter((post) => Date.parse(post.created_at) >= sevenDaysAgo);
+    const sorted =
+      sort === "latest"
+        ? posts.sort(
+            (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+          )
+        : posts.sort((a, b) => b.vote_count - a.vote_count);
+    const filtered =
+      sort === "trending"
+        ? sorted.filter(
+            (post) =>
+              Date.parse(post.created_at) >=
+              Date.now() - 7 * 24 * 60 * 60 * 1000,
+          )
+        : sorted;
+    const from = Math.max(0, page - 1) * POSTS_PER_PAGE;
+    return filtered.slice(from, from + POSTS_PER_PAGE);
   }
   const supabase = await createClient();
   let query = supabase
@@ -81,7 +108,8 @@ export async function getHomePosts(
     }
     query = query.order("vote_count", { ascending: false });
   }
-  const { data, error } = await query.limit(20);
+  const from = Math.max(0, page - 1) * POSTS_PER_PAGE;
+  const { data, error } = await query.range(from, from + POSTS_PER_PAGE - 1);
   if (error) {
     logQueryError("getHomePosts", error);
     return [];
@@ -89,16 +117,42 @@ export async function getHomePosts(
   return data as unknown as Post[];
 }
 
+export async function getHomePostCount(
+  sort: HomeSort = "trending",
+): Promise<number> {
+  if (!hasSupabaseEnv()) {
+    if (sort !== "trending") return demoPosts.length;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return demoPosts.filter(
+      (post) => Date.parse(post.created_at) >= sevenDaysAgo,
+    ).length;
+  }
+  const supabase = await createClient();
+  let query = supabase
+    .from("posts")
+    .select("*", { count: "exact", head: true });
+  if (sort === "trending") {
+    query = query.gte(
+      "created_at",
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    );
+  }
+  const { count, error } = await query;
+  if (error) {
+    logQueryError("getHomePostCount", error);
+    return 0;
+  }
+  return count ?? 0;
+}
+
 export async function getBoard(slug: string): Promise<Board | null> {
   if (!hasSupabaseEnv())
     return demoBoards.find((board) => board.slug === slug) ?? null;
+  const viewer = await getViewer();
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("boards")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_active", true)
-    .maybeSingle();
+  let query = supabase.from("boards").select("*").eq("slug", slug);
+  if (viewer?.role !== "admin") query = query.eq("is_active", true);
+  const { data, error } = await query.maybeSingle();
   if (error) logQueryError("getBoard", error);
   return data as Board | null;
 }
@@ -119,11 +173,11 @@ export async function getBoardPosts(
             ? b.vote_count - a.vote_count
             : Date.parse(b.created_at) - Date.parse(a.created_at)),
       );
-    const from = Math.max(0, page - 1) * 20;
-    return posts.slice(from, from + 20);
+    const from = Math.max(0, page - 1) * POSTS_PER_PAGE;
+    return posts.slice(from, from + POSTS_PER_PAGE);
   }
   const supabase = await createClient();
-  const from = Math.max(0, page - 1) * 20;
+  const from = Math.max(0, page - 1) * POSTS_PER_PAGE;
   let query = supabase
     .from("posts")
     .select("*, author:profiles!posts_author_id_fkey(username,avatar_url)")
@@ -132,7 +186,7 @@ export async function getBoardPosts(
   query = query.order(sort === "popular" ? "vote_count" : "created_at", {
     ascending: false,
   });
-  const { data, error } = await query.range(from, from + 19);
+  const { data, error } = await query.range(from, from + POSTS_PER_PAGE - 1);
   if (error) {
     logQueryError("getBoardPosts", error);
     return [];
@@ -140,7 +194,48 @@ export async function getBoardPosts(
   return data as unknown as Post[];
 }
 
-export async function getPost(postId: string): Promise<Post | null> {
+export async function getBoardPostCount(boardId: string): Promise<number> {
+  if (!hasSupabaseEnv())
+    return demoPosts.filter((post) => post.board_id === boardId).length;
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("posts")
+    .select("*", { count: "exact", head: true })
+    .eq("board_id", boardId);
+  if (error) {
+    logQueryError("getBoardPostCount", error);
+    return 0;
+  }
+  return count ?? 0;
+}
+
+export async function getBoardBestPosts(boardId: string): Promise<Post[]> {
+  if (!hasSupabaseEnv())
+    return demoPosts
+      .filter((post) => post.board_id === boardId && !post.is_pinned)
+      .slice()
+      .sort((a, b) => b.vote_count - a.vote_count)
+      .slice(0, 3);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*, author:profiles!posts_author_id_fkey(username,avatar_url)")
+    .eq("board_id", boardId)
+    .eq("is_pinned", false)
+    .gte(
+      "created_at",
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    )
+    .order("vote_count", { ascending: false })
+    .limit(3);
+  if (error) {
+    logQueryError("getBoardBestPosts", error);
+    return [];
+  }
+  return data as unknown as Post[];
+}
+
+export const getPost = cache(async (postId: string): Promise<Post | null> => {
   if (!hasSupabaseEnv())
     return demoPosts.find((post) => post.id === postId) ?? null;
   const supabase = await createClient();
@@ -153,11 +248,13 @@ export async function getPost(postId: string): Promise<Post | null> {
     .maybeSingle();
   if (error) logQueryError("getPost", error);
   return data as unknown as Post | null;
-}
+});
 
 export async function getComments(postId: string): Promise<Comment[]> {
   if (!hasSupabaseEnv())
-    return demoComments.filter((comment) => comment.post_id === postId);
+    return orderComments(
+      demoComments.filter((comment) => comment.post_id === postId),
+    );
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("comments")
@@ -168,7 +265,7 @@ export async function getComments(postId: string): Promise<Comment[]> {
     logQueryError("getComments", error);
     return [];
   }
-  return data as unknown as Comment[];
+  return orderComments(data as unknown as Comment[]);
 }
 
 export const getViewer = cache(async (): Promise<Profile | null> => {
@@ -219,6 +316,65 @@ export async function getMyCommentCount(userId: string): Promise<number> {
     return 0;
   }
   return count ?? 0;
+}
+
+export async function getMyVote(postId: string): Promise<1 | -1 | null> {
+  if (!hasSupabaseEnv()) return null;
+  const viewer = await getViewer();
+  if (!viewer) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("post_votes")
+    .select("value")
+    .eq("post_id", postId)
+    .eq("user_id", viewer.id)
+    .maybeSingle();
+  if (error) {
+    logQueryError("getMyVote", error);
+    return null;
+  }
+  return data?.value === 1 || data?.value === -1 ? data.value : null;
+}
+
+export async function incrementViewCount(
+  postId: string,
+): Promise<number | null> {
+  if (!hasSupabaseEnv()) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("increment_view_count", {
+    target_post_id: postId,
+  });
+  if (error) {
+    logQueryError("incrementViewCount", error);
+    return null;
+  }
+  return typeof data === "number" ? data : null;
+}
+
+export async function searchPosts(query: string): Promise<Post[]> {
+  const term = query.trim().slice(0, 100);
+  if (!term) return [];
+  if (!hasSupabaseEnv()) {
+    const normalized = term.toLocaleLowerCase("ja-JP");
+    return demoPosts.filter((post) =>
+      post.title.toLocaleLowerCase("ja-JP").includes(normalized),
+    );
+  }
+  const supabase = await createClient();
+  const pattern = term.replace(/[\\%_]/g, "\\$&");
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      "*, board:boards(slug,name,icon), author:profiles!posts_author_id_fkey(username,avatar_url)",
+    )
+    .ilike("title", `%${pattern}%`)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) {
+    logQueryError("searchPosts", error);
+    return [];
+  }
+  return data as unknown as Post[];
 }
 
 export async function getNotifications(limit = 10): Promise<Notification[]> {

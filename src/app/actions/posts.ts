@@ -3,22 +3,30 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { hasSupabaseEnv } from "@/lib/env";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
 
-async function getUser() {
+async function getActor() {
   if (!hasSupabaseEnv()) return null;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
-  return data.user;
+  if (!data.user) return null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  return { user: data.user, role: profile?.role ?? "member" };
 }
 
 export async function savePost(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await getUser();
-  if (!user) return { error: "投稿するにはログインしてください。" };
+  const actor = await getActor();
+  if (!actor) return { error: "投稿するにはログインしてください。" };
+  const { user, role } = actor;
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   const boardId = String(formData.get("boardId") ?? "");
@@ -48,16 +56,17 @@ export async function savePost(
       .data.publicUrl;
   }
   if (postId) {
-    const { error } = await supabase
+    let query = supabase
       .from("posts")
       .update({
         title,
         content,
         ...(thumbnailUrl ? { thumbnail_url: thumbnailUrl } : {}),
       })
-      .eq("id", postId)
-      .eq("author_id", user.id);
-    if (error) return { error: "投稿を更新できませんでした。" };
+      .eq("id", postId);
+    if (role !== "admin") query = query.eq("author_id", user.id);
+    const { data, error } = await query.select("id").maybeSingle();
+    if (error || !data) return { error: "投稿を更新できませんでした。" };
     revalidatePath(`/boards/${slug}/${postId}`);
     redirect(`/boards/${slug}/${postId}`);
   }
@@ -78,16 +87,20 @@ export async function savePost(
 }
 
 export async function deletePost(formData: FormData) {
-  const user = await getUser();
-  if (!user) redirect("/login");
+  const actor = await getActor();
+  if (!actor) redirect("/login");
   const postId = String(formData.get("postId") ?? "");
   const slug = String(formData.get("slug") ?? "");
   const supabase = await createClient();
-  await supabase
-    .from("posts")
-    .delete()
-    .eq("id", postId)
-    .eq("author_id", user.id);
+  let query = supabase.from("posts").delete().eq("id", postId);
+  if (actor.role !== "admin") query = query.eq("author_id", actor.user.id);
+  const { data, error } = await query.select("id").maybeSingle();
+  if (error || !data) {
+    console.error(
+      `[posts:delete] Failed to delete post (${error?.code ?? "not-found"}): ${error?.message ?? postId}`,
+    );
+    throw new Error("投稿を削除できませんでした。");
+  }
   revalidatePath(`/boards/${slug}`);
   redirect(`/boards/${slug}`);
 }
@@ -96,8 +109,8 @@ export async function addComment(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await getUser();
-  if (!user) return { error: "コメントするにはログインしてください。" };
+  const actor = await getActor();
+  if (!actor) return { error: "コメントするにはログインしてください。" };
   const content = String(formData.get("content") ?? "").trim();
   const postId = String(formData.get("postId") ?? "");
   const slug = String(formData.get("slug") ?? "");
@@ -105,9 +118,18 @@ export async function addComment(
   if (content.length < 2)
     return { error: "コメントは2文字以上で入力してください。" };
   const supabase = await createClient();
+  if (parentId) {
+    const { data: parent, error: parentError } = await supabase
+      .from("comments")
+      .select("post_id,parent_id")
+      .eq("id", parentId)
+      .maybeSingle();
+    if (parentError || parent?.post_id !== postId || parent.parent_id)
+      return { error: "返信先のコメントを確認できませんでした。" };
+  }
   const { error } = await supabase.from("comments").insert({
     post_id: postId,
-    author_id: user.id,
+    author_id: actor.user.id,
     parent_id: parentId,
     content,
   });
@@ -120,14 +142,84 @@ export async function votePost(
   postId: string,
   slug: string,
   value: 1 | -1,
-): Promise<ActionState> {
-  const user = await getUser();
-  if (!user) return { error: "投票するにはログインしてください。" };
+): Promise<ActionState & { vote?: 1 | -1 | null }> {
+  const actor = await getActor();
+  if (!actor) return { error: "投票するにはログインしてください。" };
   const supabase = await createClient();
+  const { data: existing, error: readError } = await supabase
+    .from("post_votes")
+    .select("value")
+    .eq("post_id", postId)
+    .eq("user_id", actor.user.id)
+    .maybeSingle();
+  if (readError) return { error: "投票状態を確認できませんでした。" };
+
+  if (existing?.value === value) {
+    const { error } = await supabase
+      .from("post_votes")
+      .delete()
+      .eq("post_id", postId)
+      .eq("user_id", actor.user.id);
+    if (error) return { error: "投票を取り消せませんでした。" };
+    revalidatePath(`/boards/${slug}/${postId}`);
+    return { success: "投票を取り消しました。", vote: null };
+  }
+
   const { error } = await supabase
     .from("post_votes")
-    .upsert({ post_id: postId, user_id: user.id, value });
+    .upsert({ post_id: postId, user_id: actor.user.id, value });
   if (error) return { error: "投票を反映できませんでした。" };
   revalidatePath(`/boards/${slug}/${postId}`);
-  return { success: "投票を反映しました。" };
+  return { success: "投票を反映しました。", vote: value };
+}
+
+export async function deleteComment(formData: FormData) {
+  const actor = await getActor();
+  if (!actor) redirect("/login");
+  const commentId = String(formData.get("commentId") ?? "");
+  const postId = String(formData.get("postId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const supabase = await createClient();
+  let query = supabase.from("comments").delete().eq("id", commentId);
+  if (actor.role !== "admin") query = query.eq("author_id", actor.user.id);
+  const { data, error } = await query.select("id").maybeSingle();
+  if (error || !data) {
+    console.error(
+      `[comments:delete] Failed to delete comment (${error?.code ?? "not-found"}): ${error?.message ?? commentId}`,
+    );
+    throw new Error("コメントを削除できませんでした。");
+  }
+  revalidatePath(`/boards/${slug}/${postId}`);
+}
+
+async function togglePostFlag(
+  formData: FormData,
+  flag: "is_pinned" | "is_notice",
+) {
+  const actor = await getActor();
+  if (actor?.role !== "admin") throw new Error("管理者権限が必要です。");
+  const postId = String(formData.get("postId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const active = formData.get("active") === "true";
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("posts")
+    .update({ [flag]: !active })
+    .eq("id", postId);
+  if (error) {
+    console.error(
+      `[posts:${flag}] Supabase update failed (${error.code}): ${error.message}`,
+    );
+    throw new Error("投稿の管理設定を変更できませんでした。");
+  }
+  revalidatePath(`/boards/${slug}`);
+  revalidatePath(`/boards/${slug}/${postId}`);
+}
+
+export async function togglePin(formData: FormData) {
+  await togglePostFlag(formData, "is_pinned");
+}
+
+export async function toggleNotice(formData: FormData) {
+  await togglePostFlag(formData, "is_notice");
 }

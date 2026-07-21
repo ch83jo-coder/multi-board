@@ -5,13 +5,22 @@ import { login, signup } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function AuthForm({ mode }: { mode: "login" | "signup" }) {
+export function AuthForm({
+  mode,
+  nextPath,
+}: {
+  mode: "login" | "signup";
+  nextPath?: string;
+}) {
   const [state, action, pending] = useActionState(
     mode === "login" ? login : signup,
     {},
   );
   return (
     <form action={action} className="space-y-4">
+      {mode === "login" && nextPath && (
+        <input type="hidden" name="next" value={nextPath} />
+      )}
       {mode === "signup" && (
         <label className="block" htmlFor="username">
           <span className="mb-1.5 block font-label-md text-label-md text-text-muted">

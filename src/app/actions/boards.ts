@@ -32,7 +32,7 @@ export async function saveBoard(
   const description = String(formData.get("description") ?? "").trim();
   const icon = String(formData.get("icon") ?? "forum").trim();
   const sort_order = Number(formData.get("sortOrder") ?? 0);
-  if (!name || !/^[a-z0-9-]+$/.test(slug))
+  if (!name || !/^[a-z0-9-]+$/.test(slug) || !Number.isFinite(sort_order))
     return { error: "名前と英小文字のスラッグを確認してください。" };
   const admin = createAdminClient();
   const payload = {
@@ -41,11 +41,10 @@ export async function saveBoard(
     description,
     icon,
     sort_order,
-    is_active: true,
   };
   const result = id
     ? await admin.from("boards").update(payload).eq("id", id)
-    : await admin.from("boards").insert(payload);
+    : await admin.from("boards").insert({ ...payload, is_active: true });
   if (result.error) return { error: "ボードを保存できませんでした。" };
   revalidatePath("/");
   revalidatePath("/admin/boards");
@@ -53,12 +52,18 @@ export async function saveBoard(
 }
 
 export async function toggleBoard(formData: FormData) {
-  if (!(await requireAdmin())) return;
+  if (!(await requireAdmin())) throw new Error("管理者権限が必要です。");
   const admin = createAdminClient();
-  await admin
+  const { error } = await admin
     .from("boards")
     .update({ is_active: formData.get("active") !== "true" })
     .eq("id", String(formData.get("id")));
+  if (error) {
+    console.error(
+      `[boards:toggle] Supabase update failed (${error.code}): ${error.message}`,
+    );
+    throw new Error("ボードの状態を変更できませんでした。");
+  }
   revalidatePath("/admin/boards");
   revalidatePath("/");
 }
