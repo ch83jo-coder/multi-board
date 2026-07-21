@@ -11,7 +11,6 @@ export default async function WritePage({
   const { slug } = await params;
   const [board, viewer] = await Promise.all([getBoard(slug), getViewer()]);
   if (!board) redirect("/");
-  if (!viewer) redirect(`/login?next=/boards/${slug}/write`);
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6">
@@ -23,7 +22,7 @@ export default async function WritePage({
         </h1>
       </div>
       <Card className="p-5 md:p-7">
-        <PostForm board={board} />
+        <PostForm board={board} isGuest={!viewer} />
       </Card>
     </div>
   );

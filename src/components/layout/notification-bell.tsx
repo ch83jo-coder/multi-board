@@ -7,6 +7,7 @@ import { useDismissibleMenu } from "@/components/layout/use-dismissible-menu";
 import { Avatar } from "@/components/ui/avatar";
 import { buttonStyles } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
+import { displayAuthorName } from "@/lib/author";
 import type { Notification } from "@/lib/types";
 
 export function NotificationBell({
@@ -85,7 +86,7 @@ export function NotificationBell({
           <div className="max-h-96 overflow-y-auto">
             {notifications.length ? (
               notifications.map((notification) => {
-                const actor = notification.actor?.username ?? "メンバー";
+                const actor = displayAuthorName(notification);
                 const slug = notification.post?.board?.slug ?? "humor";
                 return (
                   <Link

@@ -2,17 +2,45 @@
 
 import { useActionState } from "react";
 import { savePost } from "@/app/actions/posts";
+import {
+  GuestIdentityFields,
+  useGuestName,
+} from "@/components/forms/guest-identity-fields";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import type { Board, Post } from "@/lib/types";
 
-export function PostForm({ board, post }: { board: Board; post?: Post }) {
+export function PostForm({
+  board,
+  post,
+  isGuest,
+}: {
+  board: Board;
+  post?: Post;
+  isGuest: boolean;
+}) {
   const [state, action, pending] = useActionState(savePost, {});
+  const { guestName, setGuestName, rememberGuestName } = useGuestName(
+    post?.guest_name ?? "名無しさん",
+    !post,
+  );
   return (
-    <form action={action} className="space-y-5">
+    <form
+      action={action}
+      className="space-y-5"
+      onSubmit={isGuest && !post ? rememberGuestName : undefined}
+    >
       <input type="hidden" name="boardId" value={board.id} />
       <input type="hidden" name="slug" value={board.slug} />
+      <input type="hidden" name="guestMode" value={String(isGuest)} />
       {post && <input type="hidden" name="postId" value={post.id} />}
+      {isGuest && (
+        <GuestIdentityFields
+          guestName={guestName}
+          onGuestNameChange={setGuestName}
+          nameReadOnly={Boolean(post)}
+        />
+      )}
       <label className="block" htmlFor="post-title">
         <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
           タイトル
@@ -40,21 +68,23 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
           placeholder="本文を入力してください..."
         />
       </label>
-      <label className="block" htmlFor="post-image">
-        <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-          サムネイル（任意）
-        </span>
-        <Input
-          id="post-image"
-          name="image"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:font-semibold file:text-on-surface hover:file:bg-surface-container-high"
-        />
-        <span className="mt-1 block text-label-sm text-text-muted">
-          JPG、PNG、WebP・最大5MB
-        </span>
-      </label>
+      {!isGuest && (
+        <label className="block" htmlFor="post-image">
+          <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
+            サムネイル（任意）
+          </span>
+          <Input
+            id="post-image"
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:font-semibold file:text-on-surface hover:file:bg-surface-container-high"
+          />
+          <span className="mt-1 block text-label-sm text-text-muted">
+            JPG、PNG、WebP・最大5MB
+          </span>
+        </label>
+      )}
       {state.error && (
         <p
           role="alert"

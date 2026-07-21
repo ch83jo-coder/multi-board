@@ -6,6 +6,7 @@ import { after } from "next/server";
 import { deletePost, toggleNotice, togglePin } from "@/app/actions/posts";
 import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
+import { GuestDeleteForm } from "@/components/forms/guest-delete-form";
 import { VoteButtons } from "@/components/forms/vote-buttons";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, buttonStyles } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { formatDate } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
+import { displayAuthorName } from "@/lib/author";
 import {
   getComments,
   getMyVote,
@@ -46,8 +48,11 @@ export default async function PostPage({ params }: Props) {
   after(async () => {
     await incrementViewCount(postId);
   });
-  const canEdit =
-    viewer && (viewer.id === post.author_id || viewer.role === "admin");
+  const authorName = displayAuthorName(post);
+  const canManageDirectly = Boolean(
+    viewer && (viewer.id === post.author_id || viewer.role === "admin"),
+  );
+  const canEdit = post.author_id === null || canManageDirectly;
   return (
     <div className="space-y-5">
       <nav className="flex items-center gap-2 text-body-sm text-text-muted">
@@ -71,31 +76,38 @@ export default async function PostPage({ params }: Props) {
           </h1>
           <div className="mt-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar username={post.author?.username ?? "メンバー"} />
+              <Avatar username={authorName} url={post.author?.avatar_url} />
               <div>
-                <p className="font-medium">
-                  {post.author?.username ?? "メンバー"}
-                </p>
+                <p className="font-medium">{authorName}</p>
                 <p className="text-body-sm text-text-muted">
-                  コミュニティメンバー
+                  {post.author_id ? "コミュニティメンバー" : "ゲスト投稿"}
                 </p>
               </div>
             </div>
             {canEdit && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 <Link
                   href={`/boards/${slug}/${postId}/edit`}
                   className={buttonStyles({ variant: "outline" })}
                 >
                   編集
                 </Link>
-                <form action={deletePost}>
-                  <input type="hidden" name="postId" value={postId} />
-                  <input type="hidden" name="slug" value={slug} />
-                  <Button type="submit" variant="destructive">
-                    削除
-                  </Button>
-                </form>
+                {canManageDirectly ? (
+                  <form action={deletePost}>
+                    <input type="hidden" name="postId" value={postId} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <Button type="submit" variant="destructive">
+                      削除
+                    </Button>
+                  </form>
+                ) : (
+                  <GuestDeleteForm
+                    kind="post"
+                    targetId={postId}
+                    postId={postId}
+                    slug={slug}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -171,6 +183,7 @@ export default async function PostPage({ params }: Props) {
                     (viewer.id === comment.author_id ||
                       viewer.role === "admin"),
                 )}
+                viewerIsGuest={!viewer}
               />
             ))
           ) : (
@@ -180,7 +193,7 @@ export default async function PostPage({ params }: Props) {
           )}
         </div>
         <div className="mt-5">
-          <CommentForm postId={postId} slug={slug} />
+          <CommentForm postId={postId} slug={slug} isGuest={!viewer} />
         </div>
       </Card>
     </div>
