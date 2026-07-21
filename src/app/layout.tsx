@@ -18,9 +18,49 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
+const siteName = "Panmoa";
+const siteDescription = "活発で快適な交流のためのマルチボードコミュニティ。";
+const configuredSiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+  process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+  "http://localhost:3000";
+const metadataBase = new URL(
+  /^https?:\/\//.test(configuredSiteUrl)
+    ? configuredSiteUrl
+    : `https://${configuredSiteUrl}`,
+);
+
 export const metadata: Metadata = {
-  title: { default: "Panmoa", template: "%s | Panmoa" },
-  description: "活発で快適な交流のためのマルチボードコミュニティ。",
+  metadataBase,
+  applicationName: siteName,
+  title: { default: siteName, template: `%s | ${siteName}` },
+  description: siteDescription,
+  icons: {
+    icon: [{ url: "/favicon.jpg", type: "image/jpeg" }],
+    shortcut: ["/favicon.jpg"],
+  },
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName,
+    title: siteName,
+    description: siteDescription,
+    images: [
+      {
+        url: "/favicon.jpg",
+        width: 1536,
+        height: 1024,
+        alt: "Panmoaコミュニティ",
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+    images: ["/favicon.jpg"],
+  },
 };
 
 export default function RootLayout({
