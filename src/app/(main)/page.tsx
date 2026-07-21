@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BoardLinkGrid } from "@/components/boards/board-link-grid";
 import { Hero } from "@/components/home/hero";
@@ -15,6 +16,10 @@ import {
   parseHomeSort,
 } from "@/lib/data";
 import type { HomeSort } from "@/lib/types";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const sortTabs: { value: HomeSort; label: string; icon?: string }[] = [
   { value: "trending", label: "トレンド", icon: "trending_up" },

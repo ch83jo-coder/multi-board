@@ -7,7 +7,7 @@ import {
   demoPosts,
 } from "@/lib/demo-data";
 import { hasSupabaseEnv } from "@/lib/env";
-import { getAnonymousClient } from "@/lib/supabase/anonymous";
+import { getAnonymousClient } from "@/lib/supabase/anon";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Board,

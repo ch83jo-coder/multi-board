@@ -10,7 +10,10 @@ import { FeedRow } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { getMyCommentCount, getMyPosts, getViewer } from "@/lib/data";
 
-export const metadata: Metadata = { title: "プロフィール" };
+export const metadata: Metadata = {
+  title: "プロフィール",
+  robots: { index: false, follow: false },
+};
 
 export default async function ProfilePage() {
   const viewer = await getViewer();

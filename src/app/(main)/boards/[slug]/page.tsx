@@ -14,15 +14,49 @@ import {
   POSTS_PER_PAGE,
   parseBoardSort,
 } from "@/lib/data";
+import { createDescription } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ page?: string; sort?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const board = await getBoard((await params).slug);
-  return { title: board ? `${board.name}掲示板` : "掲示板" };
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
+  const board = await getBoard(slug);
+  if (!board) return { title: "掲示板", robots: { index: false } };
+
+  const parsedPage = Number(query.page ?? 1);
+  const page = Number.isFinite(parsedPage)
+    ? Math.max(1, Math.floor(parsedPage))
+    : 1;
+  const canonical =
+    page > 1 ? `/boards/${slug}?page=${page}` : `/boards/${slug}`;
+  const title = `${board.name}掲示板`;
+  const description = createDescription(board.description);
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      locale: "ja_JP",
+      siteName: "Panmoa",
+      title,
+      description,
+      url: canonical,
+      images: ["/opengraph-image"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/opengraph-image"],
+    },
+  };
 }
 
 export default async function BoardPage({ params, searchParams }: Props) {

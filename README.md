@@ -26,6 +26,7 @@ cp .env.example .env.local
 ```text
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_SITE_URL=https://example.com
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
@@ -48,7 +49,26 @@ supabase link --project-ref <PROJECT_REF>
 supabase db push
 ```
 
-現在のマイグレーションには、初期スキーマ、日本語データ、通知、閲覧数と返信通知が含まれています。
+現在のマイグレーションには、初期スキーマ、日本語データ、通知、閲覧数、返信通知、ゲスト投稿が含まれています。
+
+## SEOの設定と運用
+
+アプリは`robots.txt`、`sitemap.xml`、canonical URL、Open Graph/Twitterカード、`DiscussionForumPosting`と`WebSite`のJSON-LDを自動生成します。本番環境では`NEXT_PUBLIC_SITE_URL`に公開サイトのオリジンを設定してください。
+
+```text
+NEXT_PUBLIC_SITE_URL=https://panmoa.example
+```
+
+カスタムドメインを取得したらVercelプロジェクトの「Settings > Domains」で接続します。Vercelの標準ドメインからカスタムドメインへのリダイレクトを確認した後、Google Search ConsoleとBing Webmaster Toolsで次を実施してください。
+
+1. ドメイン所有権をDNSレコードで確認します。
+2. `https://<DOMAIN>/sitemap.xml`を送信します。
+3. 投稿詳細URLをURL検査し、インデックス登録をリクエストします。
+4. 1〜2週間、ページのインデックス登録状況を確認します。検索、認証、プロフィール、管理、投稿フォームが`noindex`として除外されていることも確認します。
+
+SEO公開前にIssue #4のリージョン固定、データ取得ウォーターフォール削減、キャッシュ設定を維持してください。TTFBとCore Web Vitalsは検索順位とクロール効率の両方に影響します。
+
+ゲスト投稿は検索品質へ直接影響します。通報されたスパムや内容の乏しい投稿を管理者が削除する運用を定め、必要に応じて最低品質基準未満の投稿へ`noindex`を追加してください。検索流入は既に導入済みのVercel Analytics、または任意のGA4で測定できます。
 
 ## OpenAIによる初期データ投入
 

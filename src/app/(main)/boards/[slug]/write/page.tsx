@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PostForm } from "@/components/forms/post-form";
 import { Card } from "@/components/ui/card";
 import { getBoard, getViewer } from "@/lib/data";
+
+export const metadata: Metadata = {
+  title: "新規投稿を作成",
+  robots: { index: false, follow: false },
+};
 
 export default async function WritePage({
   params,
