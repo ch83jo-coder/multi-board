@@ -1,4 +1,4 @@
-import type { Board, Comment, Post } from "@/lib/types";
+import type { Board, Comment, Notification, Post } from "@/lib/types";
 
 export const demoBoards: Board[] = [
   {
@@ -193,5 +193,38 @@ export const demoComments: Comment[] = [
     parent_id: "comment-1",
     content: "お褒めの言葉を受け取り、報酬としてマグロを1匹ご希望です。",
     created_at: iso(0.3),
+  },
+];
+
+export const demoNotifications: Notification[] = [
+  {
+    id: "notification-vote-1",
+    recipient_id: "admin",
+    actor_id: "catlover",
+    actor: { username: "CatLover99", avatar_url: null },
+    type: "vote",
+    post_id: "welcome",
+    post: {
+      title: "コミュニティガイドライン：投稿前にお読みください",
+      board: { slug: "humor" },
+    },
+    comment_id: null,
+    is_read: false,
+    created_at: iso(0.2),
+  },
+  {
+    id: "notification-comment-1",
+    recipient_id: "catlover",
+    actor_id: "remote",
+    actor: { username: "RemoteWorker", avatar_url: null },
+    type: "comment",
+    post_id: "cat-chef",
+    post: {
+      title: "うちの猫、自分をプロの料理人だと思っている",
+      board: { slug: "humor" },
+    },
+    comment_id: "comment-1",
+    is_read: true,
+    created_at: iso(0.6),
   },
 ];

@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Pagination } from "@/components/ui/pagination";
-import { getBoard, getBoardPosts } from "@/lib/data";
+import { getBoard, getBoardPosts, parseBoardSort } from "@/lib/data";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -20,10 +20,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BoardPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const page = Math.max(1, Number((await searchParams).page ?? 1));
+  const query = await searchParams;
+  const parsedPage = Number(query.page ?? 1);
+  const page = Number.isFinite(parsedPage)
+    ? Math.max(1, Math.floor(parsedPage))
+    : 1;
+  const sort = parseBoardSort(query.sort);
   const board = await getBoard(slug);
   if (!board) notFound();
-  const posts = await getBoardPosts(board.id, page);
+  const posts = await getBoardPosts(board.id, page, sort);
   const weekly = posts.filter((post) => !post.is_pinned).slice(0, 3);
   return (
     <div className="space-y-7">
@@ -49,6 +54,22 @@ export default async function BoardPage({ params, searchParams }: Props) {
         </Link>
       </header>
       <Card className="overflow-hidden">
+        <div className="flex items-center justify-end gap-1 border-b border-border-subtle bg-white px-4 py-3">
+          <Link
+            href={`/boards/${slug}?sort=popular`}
+            aria-current={sort === "popular" ? "page" : undefined}
+            className={`rounded px-3 py-1.5 font-label-md text-label-md ${sort === "popular" ? "bg-primary text-white" : "text-text-muted hover:bg-surface-alt hover:text-primary"}`}
+          >
+            人気
+          </Link>
+          <Link
+            href={`/boards/${slug}`}
+            aria-current={sort === "latest" ? "page" : undefined}
+            className={`rounded px-3 py-1.5 font-label-md text-label-md ${sort === "latest" ? "bg-primary text-white" : "text-text-muted hover:bg-surface-alt hover:text-primary"}`}
+          >
+            新着
+          </Link>
+        </div>
         <div className="hidden grid-cols-[60px_1fr_120px_100px_80px] border-b border-border-subtle bg-surface-alt px-4 py-3 font-label-md text-label-md text-text-muted md:grid">
           <div className="text-center">番号</div>
           <div>タイトル</div>
@@ -68,7 +89,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
           )}
         </div>
       </Card>
-      <Pagination current={page} />
+      <Pagination current={page} sort={sort === "latest" ? undefined : sort} />
       <section>
         <div className="mb-4 flex items-center gap-2">
           <MaterialIcon name="workspace_premium" className="text-primary" />

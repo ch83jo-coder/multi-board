@@ -6,13 +6,14 @@ import { getBoards, getViewer } from "@/lib/data";
 export async function SideNav() {
   const [boards, viewer] = await Promise.all([getBoards(), getViewer()]);
   const writeHref = boards[0] ? `/boards/${boards[0].slug}/write` : "/login";
-  const links = [
+  const links: [string, string, string][] = [
     ["leaderboard", "ランキング", "/"],
     ["trending_up", "人気", "/"],
     ["campaign", "お知らせ", "/"],
     ["groups", "コミュニティ", "/"],
-    ["settings", "設定", viewer?.role === "admin" ? "/admin/boards" : "/login"],
   ];
+  if (viewer?.role === "admin")
+    links.push(["settings", "設定", "/admin/boards"]);
   return (
     <aside className="sticky top-20 hidden h-[calc(100vh-96px)] w-64 shrink-0 xl:flex xl:flex-col">
       <div className="flex h-full flex-col rounded-lg border border-border-subtle bg-surface-alt p-gutter">

@@ -1,9 +1,21 @@
 import Link from "next/link";
+import { NotificationBell } from "@/components/layout/notification-bell";
+import { ProfileMenu } from "@/components/layout/profile-menu";
 import { MaterialIcon } from "@/components/ui/material-icon";
-import { getBoards, getViewer } from "@/lib/data";
+import {
+  getBoards,
+  getNotifications,
+  getUnreadNotificationCount,
+  getViewer,
+} from "@/lib/data";
 
 export async function TopNavBar() {
-  const [boards, viewer] = await Promise.all([getBoards(), getViewer()]);
+  const [boards, viewer, notifications, unreadCount] = await Promise.all([
+    getBoards(),
+    getViewer(),
+    getNotifications(),
+    getUnreadNotificationCount(),
+  ]);
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center border-b border-border-subtle bg-surface/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-container-max-width items-center justify-between px-4 md:px-margin-desktop">
@@ -41,20 +53,21 @@ export async function TopNavBar() {
               className="absolute right-3 top-2 text-text-muted"
             />
           </form>
-          <button
-            type="button"
-            aria-label="通知"
-            className="p-2 text-text-muted hover:text-primary"
-          >
-            <MaterialIcon name="notifications" />
-          </button>
-          <Link
-            aria-label={viewer ? "プロフィール" : "ログイン"}
-            href={viewer ? "/" : "/login"}
-            className="p-2 text-text-muted hover:text-primary"
-          >
-            <MaterialIcon name={viewer ? "account_circle" : "login"} />
-          </Link>
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+          />
+          {viewer ? (
+            <ProfileMenu viewer={viewer} />
+          ) : (
+            <Link
+              aria-label="ログイン"
+              href="/login"
+              className="p-2 text-text-muted hover:text-primary"
+            >
+              <MaterialIcon name="login" />
+            </Link>
+          )}
         </div>
       </div>
     </header>

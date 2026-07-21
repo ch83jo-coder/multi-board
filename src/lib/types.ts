@@ -6,6 +6,9 @@ export type Profile = {
   role: "member" | "admin";
 };
 
+export type HomeSort = "trending" | "latest" | "top";
+export type BoardSort = "latest" | "popular";
+
 export type Board = {
   id: string;
   slug: string;
@@ -42,6 +45,22 @@ export type Comment = {
   author?: Pick<Profile, "username" | "avatar_url">;
   parent_id: string | null;
   content: string;
+  created_at: string;
+};
+
+export type Notification = {
+  id: string;
+  recipient_id: string;
+  actor_id: string | null;
+  actor?: Pick<Profile, "username" | "avatar_url"> | null;
+  type: "comment" | "vote";
+  post_id: string;
+  post?: {
+    title: string;
+    board?: Pick<Board, "slug"> | null;
+  } | null;
+  comment_id: string | null;
+  is_read: boolean;
   created_at: string;
 };
 
