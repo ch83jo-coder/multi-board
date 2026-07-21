@@ -165,10 +165,23 @@ export async function votePost(
     return { success: "投票を取り消しました。", vote: null };
   }
 
-  const { error } = await supabase
-    .from("post_votes")
-    .upsert({ post_id: postId, user_id: actor.user.id, value });
-  if (error) return { error: "投票を反映できませんでした。" };
+  // upsert(ON CONFLICT DO UPDATE)は SET 対象の全カラムに UPDATE 権限を要求するが、
+  // authenticated には value カラムのみ許可されているため insert/update を分岐する。
+  const { error } = existing
+    ? await supabase
+        .from("post_votes")
+        .update({ value })
+        .eq("post_id", postId)
+        .eq("user_id", actor.user.id)
+    : await supabase
+        .from("post_votes")
+        .insert({ post_id: postId, user_id: actor.user.id, value });
+  if (error) {
+    console.error(
+      `[posts:vote] Failed to apply vote (${error.code}): ${error.message}`,
+    );
+    return { error: "投票を反映できませんでした。" };
+  }
   revalidatePath(`/boards/${slug}/${postId}`);
   return { success: "投票を反映しました。", vote: value };
 }
