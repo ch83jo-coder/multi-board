@@ -5,10 +5,10 @@ export function MobileBottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-center justify-around border-t border-border-subtle bg-white md:hidden">
       {[
-        ["home", "Home", "/"],
-        ["explore", "Boards", "/boards/humor"],
-        ["edit", "Write", "/boards/humor/write"],
-        ["person", "Account", "/login"],
+        ["home", "ホーム", "/"],
+        ["explore", "ボード", "/boards/humor"],
+        ["edit", "投稿", "/boards/humor/write"],
+        ["person", "アカウント", "/login"],
       ].map(([icon, label, href]) => (
         <Link
           key={label}

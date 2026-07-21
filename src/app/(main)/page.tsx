@@ -18,19 +18,19 @@ export default async function HomePage() {
               className="flex items-center gap-1 font-label-md text-label-md text-primary"
             >
               <MaterialIcon name="trending_up" className="text-sm" />
-              Trending
+              トレンド
             </button>
             <button
               type="button"
               className="font-label-md text-label-md text-text-muted"
             >
-              Latest
+              新着
             </button>
             <button
               type="button"
               className="font-label-md text-label-md text-text-muted"
             >
-              Top Rated
+              高評価
             </button>
           </div>
           <MaterialIcon name="view_list" className="text-text-muted" />

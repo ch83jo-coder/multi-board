@@ -26,7 +26,7 @@ export function VoteButtons({
         type="button"
         disabled={pending}
         onClick={() => vote(1)}
-        aria-label="Upvote"
+        aria-label="賛成票を入れる"
         className="rounded border border-border-subtle p-2 text-primary hover:bg-primary-fixed"
       >
         <MaterialIcon name="expand_less" />
@@ -36,7 +36,7 @@ export function VoteButtons({
         type="button"
         disabled={pending}
         onClick={() => vote(-1)}
-        aria-label="Downvote"
+        aria-label="反対票を入れる"
         className="rounded border border-border-subtle p-2 text-text-muted hover:bg-surface-alt"
       >
         <MaterialIcon name="expand_more" />

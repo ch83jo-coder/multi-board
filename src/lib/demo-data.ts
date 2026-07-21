@@ -4,8 +4,8 @@ export const demoBoards: Board[] = [
   {
     id: "board-humor",
     slug: "humor",
-    name: "Humor",
-    description: "A light place for sharp jokes, memes, and everyday comedy.",
+    name: "ユーモア",
+    description: "ジョークやミーム、日常の笑いを気軽に共有するボードです。",
     icon: "sentiment_very_satisfied",
     sort_order: 1,
     is_active: true,
@@ -14,9 +14,9 @@ export const demoBoards: Board[] = [
   {
     id: "board-news",
     slug: "news",
-    name: "News",
+    name: "ニュース",
     description:
-      "Breaking stories and considered discussion from around the world.",
+      "国内外の最新ニュースについて、じっくり意見を交わすボードです。",
     icon: "newspaper",
     sort_order: 2,
     is_active: true,
@@ -25,8 +25,8 @@ export const demoBoards: Board[] = [
   {
     id: "board-sports",
     slug: "sports",
-    name: "Sports",
-    description: "Live games, analysis, transfers, and community predictions.",
+    name: "スポーツ",
+    description: "試合速報、分析、移籍情報、勝敗予想を楽しむボードです。",
     icon: "sports_soccer",
     sort_order: 3,
     is_active: true,
@@ -35,8 +35,8 @@ export const demoBoards: Board[] = [
   {
     id: "board-game",
     slug: "game",
-    name: "Game",
-    description: "Games, hardware, releases, guides, and friendly competition.",
+    name: "ゲーム",
+    description: "ゲーム、ハードウェア、新作、攻略情報を共有するボードです。",
     icon: "sports_esports",
     sort_order: 4,
     is_active: true,
@@ -51,12 +51,16 @@ export const demoPosts: Post[] = [
   {
     id: "welcome",
     board_id: "board-humor",
-    board: { slug: "humor", name: "Humor", icon: "sentiment_very_satisfied" },
+    board: {
+      slug: "humor",
+      name: "ユーモア",
+      icon: "sentiment_very_satisfied",
+    },
     author_id: "admin",
     author: { username: "Admin_Panmoa", avatar_url: null },
-    title: "Community Rules: Please read before posting",
+    title: "コミュニティガイドライン：投稿前にお読みください",
     content:
-      "Welcome to Panmoa. Be generous, stay on topic, and remember there is a person behind every username.\n\nUse clear titles, credit original creators, and report content that breaks the rules.",
+      "Panmoaへようこそ。相手を尊重し、話題に沿って交流してください。すべてのユーザー名の向こう側には、一人の人がいます。\n\n分かりやすいタイトルを付け、引用元を明記し、ルール違反のコンテンツは報告してください。",
     thumbnail_url: null,
     view_count: 12040,
     comment_count: 42,
@@ -69,12 +73,16 @@ export const demoPosts: Post[] = [
   {
     id: "cat-chef",
     board_id: "board-humor",
-    board: { slug: "humor", name: "Humor", icon: "sentiment_very_satisfied" },
+    board: {
+      slug: "humor",
+      name: "ユーモア",
+      icon: "sentiment_very_satisfied",
+    },
     author_id: "catlover",
     author: { username: "CatLover99", avatar_url: null },
-    title: "My cat thinks he's a professional chef",
+    title: "うちの猫、自分をプロの料理人だと思っている",
     content:
-      "He sits beside the cutting board every evening and supervises dinner like the smallest, strictest executive chef. Today he rejected the parsley.",
+      "毎晩まな板の隣に座り、小さくて厳しい総料理長のように夕食作りを監督しています。今日はパセリにダメ出しされました。",
     thumbnail_url:
       "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=480&q=80",
     view_count: 2410,
@@ -88,12 +96,16 @@ export const demoPosts: Post[] = [
   {
     id: "remote-pajamas",
     board_id: "board-humor",
-    board: { slug: "humor", name: "Humor", icon: "sentiment_very_satisfied" },
+    board: {
+      slug: "humor",
+      name: "ユーモア",
+      icon: "sentiment_very_satisfied",
+    },
     author_id: "remote",
     author: { username: "RemoteWorker", avatar_url: null },
-    title: "The paradox of working from home in pajamas",
+    title: "パジャマで在宅勤務するという矛盾",
     content:
-      "The commute is four metres, yet somehow I am still two minutes late. Science has no explanation.",
+      "通勤距離はたった4メートルなのに、なぜか今日も2分遅刻しました。科学でも説明できません。",
     thumbnail_url: null,
     view_count: 1140,
     comment_count: 8,
@@ -106,12 +118,15 @@ export const demoPosts: Post[] = [
   {
     id: "captcha",
     board_id: "board-humor",
-    board: { slug: "humor", name: "Humor", icon: "sentiment_very_satisfied" },
+    board: {
+      slug: "humor",
+      name: "ユーモア",
+      icon: "sentiment_very_satisfied",
+    },
     author_id: "human",
     author: { username: "DefinitelyHuman", avatar_url: null },
-    title: "Is it just me or are captchas getting harder?",
-    content:
-      "At this point the traffic light is three pixels and a philosophical concept.",
+    title: "CAPTCHA、最近難しくなっていませんか？",
+    content: "信号機が3ピクセルしかなく、もはや哲学的な概念に見えてきました。",
     thumbnail_url: null,
     view_count: 8700,
     comment_count: 124,
@@ -124,12 +139,12 @@ export const demoPosts: Post[] = [
   {
     id: "launch",
     board_id: "board-news",
-    board: { slug: "news", name: "News", icon: "newspaper" },
+    board: { slug: "news", name: "ニュース", icon: "newspaper" },
     author_id: "editor",
     author: { username: "Newsroom", avatar_url: null },
-    title: "Panmoa 2.0 Launch: A New Era for Professional Discussion",
+    title: "Panmoa 2.0公開：新しい議論の時代へ",
     content:
-      "Our new architecture puts fast, structured discussion first. Boards are now dynamic, navigation is clearer, and every page is designed for information density without visual noise.",
+      "新しいアーキテクチャでは、すばやく整理された議論を最優先にしました。ボードは動的になり、ナビゲーションも分かりやすく、情報量を保ちながら視覚的なノイズを抑えています。",
     thumbnail_url:
       "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=960&q=80",
     view_count: 16200,
@@ -143,11 +158,12 @@ export const demoPosts: Post[] = [
   {
     id: "framework-poll",
     board_id: "board-game",
-    board: { slug: "game", name: "Game", icon: "sports_esports" },
+    board: { slug: "game", name: "ゲーム", icon: "sports_esports" },
     author_id: "dev",
     author: { username: "StackWatcher", avatar_url: null },
-    title: "Poll of the Day: Which framework are you prioritizing?",
-    content: "Share what you are building and why your team made the choice.",
+    title: "今日の投票：いま最も重視しているフレームワークは？",
+    content:
+      "何を開発しているのか、チームがその選択をした理由も教えてください。",
     thumbnail_url: null,
     view_count: 3780,
     comment_count: 64,
@@ -166,7 +182,7 @@ export const demoComments: Comment[] = [
     author_id: "remote",
     author: { username: "RemoteWorker", avatar_url: null },
     parent_id: null,
-    content: "Please tell the chef that the plating is impeccable.",
+    content: "盛り付けが完璧だとシェフにお伝えください。",
     created_at: iso(0.6),
   },
   {
@@ -175,7 +191,7 @@ export const demoComments: Comment[] = [
     author_id: "catlover",
     author: { username: "CatLover99", avatar_url: null },
     parent_id: "comment-1",
-    content: "He accepts your compliment and requests one tuna as payment.",
+    content: "お褒めの言葉を受け取り、報酬としてマグロを1匹ご希望です。",
     created_at: iso(0.3),
   },
 ];

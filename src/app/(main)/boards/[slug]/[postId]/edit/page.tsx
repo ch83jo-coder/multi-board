@@ -21,7 +21,7 @@ export default async function EditPage({
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="mb-6 font-headline-lg text-headline-lg-mobile md:text-headline-lg">
-        게시글 수정
+        投稿を編集
       </h1>
       <Card className="p-5 md:p-7">
         <PostForm board={board} post={post} />

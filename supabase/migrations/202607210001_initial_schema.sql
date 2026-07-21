@@ -214,8 +214,8 @@ create policy "Members delete own post images" on storage.objects for delete to 
 
 insert into public.boards (slug, name, description, icon, sort_order)
 values
-  ('humor', 'Humor', 'A light place for sharp jokes, memes, and everyday comedy.', 'sentiment_very_satisfied', 1),
-  ('news', 'News', 'Breaking stories and considered discussion from around the world.', 'newspaper', 2),
-  ('sports', 'Sports', 'Live games, analysis, transfers, and community predictions.', 'sports_soccer', 3),
-  ('game', 'Game', 'Games, hardware, releases, guides, and friendly competition.', 'sports_esports', 4)
+  ('humor', 'ユーモア', 'ジョークやミーム、日常の笑いを気軽に共有するボードです。', 'sentiment_very_satisfied', 1),
+  ('news', 'ニュース', '国内外の最新ニュースについて、じっくり意見を交わすボードです。', 'newspaper', 2),
+  ('sports', 'スポーツ', '試合速報、分析、移籍情報、勝敗予想を楽しむボードです。', 'sports_soccer', 3),
+  ('game', 'ゲーム', 'ゲーム、ハードウェア、新作、攻略情報を共有するボードです。', 'sports_esports', 4)
 on conflict (slug) do nothing;

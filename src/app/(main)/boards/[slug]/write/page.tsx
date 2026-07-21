@@ -16,10 +16,10 @@ export default async function WritePage({
     <div className="mx-auto max-w-3xl">
       <div className="mb-6">
         <span className="font-label-sm uppercase tracking-wider text-primary">
-          {board.name} Board
+          {board.name}掲示板
         </span>
         <h1 className="mt-1 font-headline-lg text-headline-lg-mobile md:text-headline-lg">
-          새 게시글 작성
+          新規投稿を作成
         </h1>
       </div>
       <Card className="p-5 md:p-7">

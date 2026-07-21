@@ -9,21 +9,17 @@ export function BoardForm() {
   const [state, action, pending] = useActionState(saveBoard, {});
   return (
     <form action={action} className="grid gap-3 md:grid-cols-2">
-      <Input name="name" placeholder="Board name" required />
+      <Input name="name" placeholder="ボード名" required />
       <Input
         name="slug"
         placeholder="board-slug"
         pattern="[a-z0-9-]+"
         required
       />
-      <Input
-        name="description"
-        placeholder="Description"
-        className="md:col-span-2"
-      />
+      <Input name="description" placeholder="説明" className="md:col-span-2" />
       <Input
         name="icon"
-        placeholder="Material icon (forum)"
+        placeholder="Materialアイコン（forum）"
         defaultValue="forum"
       />
       <Input name="sortOrder" type="number" defaultValue="0" />
@@ -36,7 +32,7 @@ export function BoardForm() {
         </p>
       )}
       <Button type="submit" className="md:col-span-2" disabled={pending}>
-        {pending ? "저장 중..." : "보드 생성"}
+        {pending ? "保存中..." : "ボードを作成"}
       </Button>
     </form>
   );

@@ -3,6 +3,16 @@ import { hasSupabaseEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type { Board, Comment, Post, Profile } from "@/lib/types";
 
+function logQueryError(
+  query: string,
+  error: { code?: string; message: string } | null,
+) {
+  if (!error) return;
+  console.error(
+    `[data:${query}] Supabase query failed (${error.code ?? "unknown"}): ${error.message}`,
+  );
+}
+
 export async function getBoards(): Promise<Board[]> {
   if (!hasSupabaseEnv()) return demoBoards;
   const supabase = await createClient();
@@ -11,7 +21,10 @@ export async function getBoards(): Promise<Board[]> {
     .select("*")
     .eq("is_active", true)
     .order("sort_order");
-  if (error) return demoBoards;
+  if (error) {
+    logQueryError("getBoards", error);
+    return [];
+  }
   return data as Board[];
 }
 
@@ -21,11 +34,14 @@ export async function getHomePosts(): Promise<Post[]> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "*, board:boards(slug,name,icon), author:profiles(username,avatar_url)",
+      "*, board:boards(slug,name,icon), author:profiles!posts_author_id_fkey(username,avatar_url)",
     )
     .order("vote_count", { ascending: false })
     .limit(20);
-  if (error) return demoPosts;
+  if (error) {
+    logQueryError("getHomePosts", error);
+    return [];
+  }
   return data as unknown as Post[];
 }
 
@@ -33,12 +49,13 @@ export async function getBoard(slug: string): Promise<Board | null> {
   if (!hasSupabaseEnv())
     return demoBoards.find((board) => board.slug === slug) ?? null;
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("boards")
     .select("*")
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
+  if (error) logQueryError("getBoard", error);
   return data as Board | null;
 }
 
@@ -52,12 +69,15 @@ export async function getBoardPosts(
   const from = Math.max(0, page - 1) * 20;
   const { data, error } = await supabase
     .from("posts")
-    .select("*, author:profiles(username,avatar_url)")
+    .select("*, author:profiles!posts_author_id_fkey(username,avatar_url)")
     .eq("board_id", boardId)
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .range(from, from + 19);
-  if (error) return [];
+  if (error) {
+    logQueryError("getBoardPosts", error);
+    return [];
+  }
   return data as unknown as Post[];
 }
 
@@ -65,13 +85,14 @@ export async function getPost(postId: string): Promise<Post | null> {
   if (!hasSupabaseEnv())
     return demoPosts.find((post) => post.id === postId) ?? null;
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("posts")
     .select(
-      "*, board:boards(slug,name,icon), author:profiles(username,avatar_url)",
+      "*, board:boards(slug,name,icon), author:profiles!posts_author_id_fkey(username,avatar_url)",
     )
     .eq("id", postId)
     .maybeSingle();
+  if (error) logQueryError("getPost", error);
   return data as unknown as Post | null;
 }
 
@@ -81,22 +102,28 @@ export async function getComments(postId: string): Promise<Comment[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("comments")
-    .select("*, author:profiles(username,avatar_url)")
+    .select("*, author:profiles!comments_author_id_fkey(username,avatar_url)")
     .eq("post_id", postId)
     .order("created_at");
-  if (error) return [];
+  if (error) {
+    logQueryError("getComments", error);
+    return [];
+  }
   return data as unknown as Comment[];
 }
 
 export async function getViewer(): Promise<Profile | null> {
   if (!hasSupabaseEnv()) return null;
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth, error: authError } = await supabase.auth.getUser();
+  if (authError && authError.name !== "AuthSessionMissingError")
+    logQueryError("getViewer.auth", authError);
   if (!auth.user) return null;
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", auth.user.id)
     .maybeSingle();
+  if (error) logQueryError("getViewer.profile", error);
   return data as Profile | null;
 }

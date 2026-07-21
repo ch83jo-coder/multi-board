@@ -16,7 +16,7 @@ export async function TopNavBar() {
           </Link>
           <nav className="hidden h-16 items-center gap-6 md:flex">
             <Link href="/" className="font-label-md text-label-md text-primary">
-              Hot
+              注目
             </Link>
             {boards.slice(0, 4).map((board) => (
               <Link
@@ -34,7 +34,7 @@ export async function TopNavBar() {
             <input
               name="q"
               className="w-64 rounded border border-transparent bg-surface-container px-4 py-2 pr-10 text-body-md outline-none focus:border-primary"
-              placeholder="Search discussions..."
+              placeholder="投稿を検索..."
             />
             <MaterialIcon
               name="search"
@@ -43,13 +43,13 @@ export async function TopNavBar() {
           </form>
           <button
             type="button"
-            aria-label="Notifications"
+            aria-label="通知"
             className="p-2 text-text-muted hover:text-primary"
           >
             <MaterialIcon name="notifications" />
           </button>
           <Link
-            aria-label={viewer ? "Profile" : "Log in"}
+            aria-label={viewer ? "プロフィール" : "ログイン"}
             href={viewer ? "/" : "/login"}
             className="p-2 text-text-muted hover:text-primary"
           >

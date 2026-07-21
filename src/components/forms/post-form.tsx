@@ -15,7 +15,7 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
       {post && <input type="hidden" name="postId" value={post.id} />}
       <label className="block" htmlFor="post-title">
         <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-          TITLE
+          タイトル
         </span>
         <Input
           name="title"
@@ -24,12 +24,12 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
           minLength={3}
           maxLength={160}
           required
-          placeholder="토론 내용을 명확하게 설명해 주세요"
+          placeholder="投稿内容が分かるタイトルを入力してください"
         />
       </label>
       <label className="block" htmlFor="post-content">
         <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-          CONTENT
+          本文
         </span>
         <Textarea
           name="content"
@@ -37,12 +37,12 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
           defaultValue={post?.content}
           minLength={10}
           required
-          placeholder="내용을 입력하세요..."
+          placeholder="本文を入力してください..."
         />
       </label>
       <label className="block" htmlFor="post-image">
         <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-          THUMBNAIL (OPTIONAL)
+          サムネイル（任意）
         </span>
         <Input
           id="post-image"
@@ -52,7 +52,7 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
           className="file:mr-3 file:rounded file:border-0 file:bg-primary-fixed file:px-3 file:py-1.5 file:text-primary"
         />
         <span className="mt-1 block text-label-sm text-text-muted">
-          JPG, PNG, WebP · 최대 5MB
+          JPG、PNG、WebP・最大5MB
         </span>
       </label>
       {state.error && (
@@ -65,7 +65,7 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
       )}
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={pending}>
-          {pending ? "저장 중..." : post ? "변경사항 저장" : "게시글 등록"}
+          {pending ? "保存中..." : post ? "変更を保存" : "投稿する"}
         </Button>
       </div>
     </form>

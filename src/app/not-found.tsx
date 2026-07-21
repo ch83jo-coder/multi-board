@@ -6,16 +6,16 @@ export default function NotFound() {
       <div className="text-center">
         <p className="font-label-md text-primary">404</p>
         <h1 className="mt-2 font-headline-lg text-headline-lg">
-          페이지를 찾을 수 없습니다
+          ページが見つかりません
         </h1>
         <p className="mt-3 text-body-md text-text-muted">
-          삭제되었거나 주소가 변경된 콘텐츠입니다.
+          削除されたか、URLが変更された可能性があります。
         </p>
         <Link
           href="/"
           className="mt-6 inline-flex rounded bg-primary px-5 py-2.5 font-label-md text-white"
         >
-          홈으로 돌아가기
+          ホームへ戻る
         </Link>
       </div>
     </main>

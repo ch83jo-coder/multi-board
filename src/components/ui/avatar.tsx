@@ -18,7 +18,7 @@ export function Avatar({
     return (
       <Image
         src={url}
-        alt={`${username} avatar`}
+        alt={`${username}のアバター`}
         width={48}
         height={48}
         className={`${dimensions[size]} rounded-full object-cover`}
@@ -27,7 +27,7 @@ export function Avatar({
   return (
     <div
       role="img"
-      aria-label={`${username} avatar`}
+      aria-label={`${username}のアバター`}
       className={`${dimensions[size]} flex shrink-0 items-center justify-center rounded-full bg-primary-fixed font-bold text-on-primary-fixed`}
     >
       {username.slice(0, 1).toUpperCase()}

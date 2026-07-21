@@ -11,7 +11,7 @@ export function RightSidebar({ boards }: { boards: Board[] }) {
       <Card className="overflow-hidden">
         <div className="border-b border-border-subtle px-4 py-3">
           <h2 className="font-headline-md text-base font-semibold">
-            Top Communities
+            人気のコミュニティ
           </h2>
         </div>
         <div className="divide-y divide-border-subtle">
@@ -31,7 +31,7 @@ export function RightSidebar({ boards }: { boards: Board[] }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{board.name}</p>
                 <p className="text-[11px] text-text-muted">
-                  {formatCompact(board.post_count ?? 0)} posts
+                  投稿 {formatCompact(board.post_count ?? 0)}件
                 </p>
               </div>
             </Link>
@@ -39,25 +39,25 @@ export function RightSidebar({ boards }: { boards: Board[] }) {
         </div>
       </Card>
       <Card className="overflow-hidden bg-primary-fixed p-5">
-        <span className="font-label-sm text-primary">SPONSORED</span>
+        <span className="font-label-sm text-primary">広告</span>
         <h3 className="mt-3 font-headline-md text-lg font-semibold text-on-primary-fixed">
-          Write more. Scroll less.
+          スクロールより、会話を。
         </h3>
         <p className="mt-2 text-body-sm text-on-primary-fixed-variant">
-          Join curated discussions in a community built for signal.
+          厳選された話題と、質の高いコミュニティに参加しましょう。
         </p>
       </Card>
       <Card className="p-4">
         <h2 className="mb-3 font-headline-md text-base font-semibold">
-          Trending Keywords
+          トレンドキーワード
         </h2>
         <div className="flex flex-wrap gap-2">
           {[
             "#Panmoa2",
             "#AI",
-            "#RemoteWork",
-            "#PremierLeague",
-            "#IndieGames",
+            "#リモートワーク",
+            "#プレミアリーグ",
+            "#インディーゲーム",
           ].map((tag) => (
             <Chip key={tag}>{tag}</Chip>
           ))}

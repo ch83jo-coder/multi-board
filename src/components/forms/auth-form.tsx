@@ -15,7 +15,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       {mode === "signup" && (
         <label className="block" htmlFor="username">
           <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-            USERNAME
+            ユーザー名
           </span>
           <Input
             name="username"
@@ -28,7 +28,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       )}
       <label className="block" htmlFor="email">
         <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-          EMAIL
+          メールアドレス
         </span>
         <Input
           id="email"
@@ -40,7 +40,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       </label>
       <label className="block" htmlFor="password">
         <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-          PASSWORD
+          パスワード
         </span>
         <Input
           name="password"
@@ -68,7 +68,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </p>
       )}
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "처리 중..." : mode === "login" ? "로그인" : "회원가입"}
+        {pending ? "処理中..." : mode === "login" ? "ログイン" : "新規登録"}
       </Button>
     </form>
   );

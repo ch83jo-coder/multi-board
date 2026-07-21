@@ -16,24 +16,23 @@ export default async function AdminBoardsPage() {
       <TopNavBar />
       <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 md:px-6">
         <header>
-          <span className="font-label-sm text-primary">ADMINISTRATION</span>
+          <span className="font-label-sm text-primary">管理</span>
           <h1 className="mt-1 font-headline-lg text-headline-lg-mobile md:text-headline-lg">
-            Board management
+            ボード管理
           </h1>
           <p className="mt-2 text-body-md text-text-muted">
-            Create, order, and deactivate the dynamic boards shown across
-            Panmoa.
+            Panmoaに表示する動的ボードの作成、並び替え、有効化を管理します。
           </p>
         </header>
         <Card className="p-5">
           <h2 className="mb-4 font-headline-md text-headline-md">
-            Create a board
+            ボードを作成
           </h2>
           <BoardForm />
         </Card>
         <Card className="overflow-hidden">
           <div className="border-b border-border-subtle bg-surface-alt px-5 py-3 font-label-md text-text-muted">
-            ACTIVE BOARDS
+            ボード一覧
           </div>
           <div className="divide-y divide-border-subtle">
             {boards.map((board) => (
@@ -58,7 +57,7 @@ export default async function AdminBoardsPage() {
                     value={String(board.is_active)}
                   />
                   <Button type="submit" variant="ghost">
-                    {board.is_active ? "Deactivate" : "Activate"}
+                    {board.is_active ? "無効にする" : "有効にする"}
                   </Button>
                 </form>
               </div>

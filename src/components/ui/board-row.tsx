@@ -19,7 +19,7 @@ export function BoardRow({
       <div
         className={`text-center text-body-sm ${post.is_pinned ? "font-bold text-secondary" : "text-text-muted"}`}
       >
-        {post.is_pinned ? "PIN" : 9822 - index}
+        {post.is_pinned ? "固定" : 9822 - index}
       </div>
       <div className="flex min-w-0 items-center gap-2">
         <Link
@@ -36,7 +36,7 @@ export function BoardRow({
         )}
       </div>
       <div className="hidden truncate text-body-sm text-on-surface-variant md:block">
-        {post.author?.username ?? "Member"}
+        {post.author?.username ?? "メンバー"}
       </div>
       <div className="hidden text-center text-body-sm text-text-muted md:block">
         {formatDate(post.created_at).slice(0, 5)}

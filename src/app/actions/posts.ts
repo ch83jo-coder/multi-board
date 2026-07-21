@@ -18,7 +18,7 @@ export async function savePost(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await getUser();
-  if (!user) return { error: "게시글을 작성하려면 로그인해 주세요." };
+  if (!user) return { error: "投稿するにはログインしてください。" };
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   const boardId = String(formData.get("boardId") ?? "");
@@ -26,14 +26,16 @@ export async function savePost(
   const postId = String(formData.get("postId") ?? "");
   const image = formData.get("image");
   if (title.length < 3 || content.length < 10)
-    return { error: "제목은 3자, 내용은 10자 이상 입력해 주세요." };
+    return {
+      error: "タイトルは3文字以上、本文は10文字以上で入力してください。",
+    };
   const supabase = await createClient();
   let thumbnailUrl: string | undefined;
   if (image instanceof File && image.size > 0) {
     if (image.size > 5 * 1024 * 1024)
-      return { error: "이미지는 5MB 이하만 업로드할 수 있습니다." };
+      return { error: "画像は5MB以下のファイルをアップロードしてください。" };
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.type))
-      return { error: "JPG, PNG, WebP 이미지만 업로드할 수 있습니다." };
+      return { error: "JPG、PNG、WebP形式の画像のみアップロードできます。" };
     const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
     const imagePath = `${user.id}/${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabase.storage
@@ -41,7 +43,7 @@ export async function savePost(
       .upload(imagePath, await image.arrayBuffer(), {
         contentType: image.type,
       });
-    if (uploadError) return { error: "이미지를 업로드하지 못했습니다." };
+    if (uploadError) return { error: "画像をアップロードできませんでした。" };
     thumbnailUrl = supabase.storage.from("post-images").getPublicUrl(imagePath)
       .data.publicUrl;
   }
@@ -55,7 +57,7 @@ export async function savePost(
       })
       .eq("id", postId)
       .eq("author_id", user.id);
-    if (error) return { error: "게시글을 수정하지 못했습니다." };
+    if (error) return { error: "投稿を更新できませんでした。" };
     revalidatePath(`/boards/${slug}/${postId}`);
     redirect(`/boards/${slug}/${postId}`);
   }
@@ -70,7 +72,7 @@ export async function savePost(
     })
     .select("id")
     .single();
-  if (error || !data) return { error: "게시글을 저장하지 못했습니다." };
+  if (error || !data) return { error: "投稿を保存できませんでした。" };
   revalidatePath(`/boards/${slug}`);
   redirect(`/boards/${slug}/${data.id}`);
 }
@@ -95,12 +97,13 @@ export async function addComment(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await getUser();
-  if (!user) return { error: "댓글을 작성하려면 로그인해 주세요." };
+  if (!user) return { error: "コメントするにはログインしてください。" };
   const content = String(formData.get("content") ?? "").trim();
   const postId = String(formData.get("postId") ?? "");
   const slug = String(formData.get("slug") ?? "");
   const parentId = String(formData.get("parentId") ?? "") || null;
-  if (content.length < 2) return { error: "댓글을 2자 이상 입력해 주세요." };
+  if (content.length < 2)
+    return { error: "コメントは2文字以上で入力してください。" };
   const supabase = await createClient();
   const { error } = await supabase.from("comments").insert({
     post_id: postId,
@@ -108,9 +111,9 @@ export async function addComment(
     parent_id: parentId,
     content,
   });
-  if (error) return { error: "댓글을 저장하지 못했습니다." };
+  if (error) return { error: "コメントを保存できませんでした。" };
   revalidatePath(`/boards/${slug}/${postId}`);
-  return { success: "댓글이 등록되었습니다." };
+  return { success: "コメントを投稿しました。" };
 }
 
 export async function votePost(
@@ -119,12 +122,12 @@ export async function votePost(
   value: 1 | -1,
 ): Promise<ActionState> {
   const user = await getUser();
-  if (!user) return { error: "투표하려면 로그인해 주세요." };
+  if (!user) return { error: "投票するにはログインしてください。" };
   const supabase = await createClient();
   const { error } = await supabase
     .from("post_votes")
     .upsert({ post_id: postId, user_id: user.id, value });
-  if (error) return { error: "투표를 반영하지 못했습니다." };
+  if (error) return { error: "投票を反映できませんでした。" };
   revalidatePath(`/boards/${slug}/${postId}`);
-  return { success: "투표가 반영되었습니다." };
+  return { success: "投票を反映しました。" };
 }

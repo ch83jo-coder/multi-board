@@ -16,8 +16,8 @@ export function FeedRow({ post }: { post: Post }) {
       </div>
       <div className="min-w-0 flex-1 space-y-1.5">
         <div className="flex items-center gap-2">
-          <Chip>{post.board?.name ?? "Board"}</Chip>
-          {post.is_notice && <Chip tone="success">NOTICE</Chip>}
+          <Chip>{post.board?.name ?? "ボード"}</Chip>
+          {post.is_notice && <Chip tone="success">お知らせ</Chip>}
         </div>
         <Link
           href={href}
@@ -26,8 +26,8 @@ export function FeedRow({ post }: { post: Post }) {
           {post.title}
         </Link>
         <p className="line-clamp-1 text-body-sm text-text-muted">
-          {post.author?.username ?? "Member"} · {formatDate(post.created_at)} ·{" "}
-          {post.comment_count} comments
+          {post.author?.username ?? "メンバー"} · {formatDate(post.created_at)}{" "}
+          · コメント {post.comment_count}件
         </p>
       </div>
       {post.thumbnail_url && (
@@ -44,14 +44,14 @@ export function FeedRow({ post }: { post: Post }) {
 }
 
 export function formatCompact(value: number) {
-  return new Intl.NumberFormat("en", {
+  return new Intl.NumberFormat("ja-JP", {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(value);
 }
 
 export function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat("ja-JP", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",

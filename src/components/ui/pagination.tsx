@@ -9,7 +9,7 @@ export function Pagination({
 }) {
   return (
     <nav
-      aria-label="Pagination"
+      aria-label="ページ送り"
       className="flex items-center justify-center gap-1 py-6"
     >
       <Link

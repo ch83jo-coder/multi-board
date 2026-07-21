@@ -7,31 +7,27 @@ export async function SideNav() {
   const [boards, viewer] = await Promise.all([getBoards(), getViewer()]);
   const writeHref = boards[0] ? `/boards/${boards[0].slug}/write` : "/login";
   const links = [
-    ["leaderboard", "Rankings", "/"],
-    ["trending_up", "Popular", "/"],
-    ["campaign", "Announcements", "/"],
-    ["groups", "Communities", "/"],
-    [
-      "settings",
-      "Settings",
-      viewer?.role === "admin" ? "/admin/boards" : "/login",
-    ],
+    ["leaderboard", "ランキング", "/"],
+    ["trending_up", "人気", "/"],
+    ["campaign", "お知らせ", "/"],
+    ["groups", "コミュニティ", "/"],
+    ["settings", "設定", viewer?.role === "admin" ? "/admin/boards" : "/login"],
   ];
   return (
     <aside className="sticky top-20 hidden h-[calc(100vh-96px)] w-64 shrink-0 xl:flex xl:flex-col">
       <div className="flex h-full flex-col rounded-lg border border-border-subtle bg-surface-alt p-gutter">
         <h2 className="font-headline-md text-headline-md text-primary">
-          Community Central
+          コミュニティ案内
         </h2>
         <p className="mt-1 text-body-sm text-text-muted">
-          Trending now in Panmoa
+          Panmoaの注目トピック
         </p>
         <Link
           href={writeHref}
           className="mt-6 flex items-center justify-center gap-2 rounded bg-primary py-2.5 font-label-md text-label-md text-white hover:bg-primary-container"
         >
           <MaterialIcon name="add_circle" className="text-[18px]" />
-          New Post
+          新規投稿
         </Link>
         <nav className="mt-5 flex-1 space-y-1">
           {links.map(([icon, label, href]) => (
@@ -47,13 +43,13 @@ export async function SideNav() {
         </nav>
         <div className="border-t border-border-subtle pt-4">
           <div className="flex items-center gap-3 rounded bg-white p-3">
-            <Avatar username={viewer?.username ?? "Guest"} />
+            <Avatar username={viewer?.username ?? "ゲスト"} />
             <div className="min-w-0">
               <p className="truncate font-label-md text-label-md">
-                {viewer?.username ?? "Guest member"}
+                {viewer?.username ?? "ゲストユーザー"}
               </p>
               <p className="text-[10px] text-text-muted">
-                {viewer ? `${viewer.karma} Karma` : "Sign in to join"}
+                {viewer ? `${viewer.karma} カルマ` : "ログインして参加"}
               </p>
             </div>
           </div>

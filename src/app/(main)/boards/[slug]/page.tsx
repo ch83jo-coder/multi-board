@@ -15,7 +15,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const board = await getBoard((await params).slug);
-  return { title: board ? `${board.name} Board` : "Board" };
+  return { title: board ? `${board.name}掲示板` : "掲示板" };
 }
 
 export default async function BoardPage({ params, searchParams }: Props) {
@@ -30,12 +30,12 @@ export default async function BoardPage({ params, searchParams }: Props) {
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <div className="mb-1 flex items-center gap-2 font-label-sm text-label-sm uppercase tracking-wider text-text-muted">
-            <span>Board</span>
+            <span>掲示板</span>
             <MaterialIcon name="chevron_right" className="text-[14px]" />
             <span className="font-bold text-primary">{board.name}</span>
           </div>
           <h1 className="font-headline-lg text-headline-lg-mobile text-on-surface md:text-headline-lg">
-            {board.name} Board
+            {board.name}掲示板
           </h1>
           <p className="mt-2 max-w-2xl text-body-md text-text-muted">
             {board.description}
@@ -44,17 +44,17 @@ export default async function BoardPage({ params, searchParams }: Props) {
         <Link href={`/boards/${slug}/write`}>
           <Button>
             <MaterialIcon name="edit" className="text-[18px]" />
-            New Post
+            新規投稿
           </Button>
         </Link>
       </header>
       <Card className="overflow-hidden">
         <div className="hidden grid-cols-[60px_1fr_120px_100px_80px] border-b border-border-subtle bg-surface-alt px-4 py-3 font-label-md text-label-md text-text-muted md:grid">
-          <div className="text-center">No.</div>
-          <div>Title</div>
-          <div>Author</div>
-          <div className="text-center">Date</div>
-          <div className="text-center">Views</div>
+          <div className="text-center">番号</div>
+          <div>タイトル</div>
+          <div>投稿者</div>
+          <div className="text-center">日時</div>
+          <div className="text-center">閲覧数</div>
         </div>
         <div className="divide-y divide-border-subtle">
           {posts.length ? (
@@ -63,7 +63,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
             ))
           ) : (
             <div className="px-6 py-14 text-center text-body-md text-text-muted">
-              아직 게시글이 없습니다. 첫 글을 작성해 보세요.
+              まだ投稿がありません。最初の投稿を作成してみましょう。
             </div>
           )}
         </div>
@@ -72,7 +72,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
       <section>
         <div className="mb-4 flex items-center gap-2">
           <MaterialIcon name="workspace_premium" className="text-primary" />
-          <h2 className="font-headline-md text-headline-md">Weekly Best</h2>
+          <h2 className="font-headline-md text-headline-md">今週のベスト</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           {weekly.map((post, index) => (
@@ -84,7 +84,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
               <span
                 className={`font-label-sm ${index === 0 ? "text-white/70" : "text-primary"}`}
               >
-                TOP {index + 1}
+                第{index + 1}位
               </span>
               <h3 className="mt-3 line-clamp-2 font-headline-md text-lg font-semibold">
                 {post.title}
@@ -92,7 +92,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
               <p
                 className={`mt-3 text-body-sm ${index === 0 ? "text-white/70" : "text-text-muted"}`}
               >
-                {post.vote_count} votes · {post.comment_count} comments
+                投票 {post.vote_count}件 · コメント {post.comment_count}件
               </p>
             </Link>
           ))}

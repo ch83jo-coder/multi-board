@@ -23,7 +23,7 @@ export async function saveBoard(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  if (!(await requireAdmin())) return { error: "관리자 권한이 필요합니다." };
+  if (!(await requireAdmin())) return { error: "管理者権限が必要です。" };
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const slug = String(formData.get("slug") ?? "")
@@ -33,7 +33,7 @@ export async function saveBoard(
   const icon = String(formData.get("icon") ?? "forum").trim();
   const sort_order = Number(formData.get("sortOrder") ?? 0);
   if (!name || !/^[a-z0-9-]+$/.test(slug))
-    return { error: "이름과 영문 소문자 slug를 확인해 주세요." };
+    return { error: "名前と英小文字のスラッグを確認してください。" };
   const admin = createAdminClient();
   const payload = {
     name,
@@ -46,10 +46,10 @@ export async function saveBoard(
   const result = id
     ? await admin.from("boards").update(payload).eq("id", id)
     : await admin.from("boards").insert(payload);
-  if (result.error) return { error: "보드를 저장하지 못했습니다." };
+  if (result.error) return { error: "ボードを保存できませんでした。" };
   revalidatePath("/");
   revalidatePath("/admin/boards");
-  return { success: "보드가 저장되었습니다." };
+  return { success: "ボードを保存しました。" };
 }
 
 export async function toggleBoard(formData: FormData) {

@@ -18,13 +18,13 @@ export function CommentForm({
       <input type="hidden" name="postId" value={postId} />
       <input type="hidden" name="slug" value={slug} />
       <label htmlFor="comment-content" className="sr-only">
-        댓글
+        コメント
       </label>
       <Textarea
         id="comment-content"
         name="content"
         className="min-h-24"
-        placeholder="토론에 참여하세요..."
+        placeholder="コメントを入力してください..."
         required
         minLength={2}
       />
@@ -34,7 +34,7 @@ export function CommentForm({
       )}
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>
-          {pending ? "등록 중..." : "댓글 등록"}
+          {pending ? "投稿中..." : "コメントする"}
         </Button>
       </div>
     </form>

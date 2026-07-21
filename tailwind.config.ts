@@ -57,14 +57,14 @@ const config: Config = {
         "text-muted": "#64748B",
       },
       fontFamily: {
-        "headline-lg": ["var(--font-hanken)"],
-        "headline-lg-mobile": ["var(--font-hanken)"],
-        "headline-md": ["var(--font-hanken)"],
-        "body-lg": ["var(--font-inter)"],
-        "body-md": ["var(--font-inter)"],
-        "body-sm": ["var(--font-inter)"],
-        "label-md": ["var(--font-inter)"],
-        "label-sm": ["var(--font-inter)"],
+        "headline-lg": ["var(--font-hanken)", "var(--font-noto-jp)"],
+        "headline-lg-mobile": ["var(--font-hanken)", "var(--font-noto-jp)"],
+        "headline-md": ["var(--font-hanken)", "var(--font-noto-jp)"],
+        "body-lg": ["var(--font-inter)", "var(--font-noto-jp)"],
+        "body-md": ["var(--font-inter)", "var(--font-noto-jp)"],
+        "body-sm": ["var(--font-inter)", "var(--font-noto-jp)"],
+        "label-md": ["var(--font-inter)", "var(--font-noto-jp)"],
+        "label-sm": ["var(--font-inter)", "var(--font-noto-jp)"],
       },
       fontSize: {
         "headline-lg": [
