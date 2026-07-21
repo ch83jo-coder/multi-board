@@ -58,6 +58,7 @@ export const demoPosts: Post[] = [
     },
     author_id: "admin",
     author: { username: "Admin_Panmoa", avatar_url: null },
+    guest_name: null,
     title: "コミュニティガイドライン：投稿前にお読みください",
     content:
       "Panmoaへようこそ。相手を尊重し、話題に沿って交流してください。すべてのユーザー名の向こう側には、一人の人がいます。\n\n分かりやすいタイトルを付け、引用元を明記し、ルール違反のコンテンツは報告してください。",
@@ -80,6 +81,7 @@ export const demoPosts: Post[] = [
     },
     author_id: "catlover",
     author: { username: "CatLover99", avatar_url: null },
+    guest_name: null,
     title: "うちの猫、自分をプロの料理人だと思っている",
     content:
       "毎晩まな板の隣に座り、小さくて厳しい総料理長のように夕食作りを監督しています。今日はパセリにダメ出しされました。",
@@ -103,6 +105,7 @@ export const demoPosts: Post[] = [
     },
     author_id: "remote",
     author: { username: "RemoteWorker", avatar_url: null },
+    guest_name: null,
     title: "パジャマで在宅勤務するという矛盾",
     content:
       "通勤距離はたった4メートルなのに、なぜか今日も2分遅刻しました。科学でも説明できません。",
@@ -125,6 +128,7 @@ export const demoPosts: Post[] = [
     },
     author_id: "human",
     author: { username: "DefinitelyHuman", avatar_url: null },
+    guest_name: null,
     title: "CAPTCHA、最近難しくなっていませんか？",
     content: "信号機が3ピクセルしかなく、もはや哲学的な概念に見えてきました。",
     thumbnail_url: null,
@@ -142,6 +146,7 @@ export const demoPosts: Post[] = [
     board: { slug: "news", name: "ニュース", icon: "newspaper" },
     author_id: "editor",
     author: { username: "Newsroom", avatar_url: null },
+    guest_name: null,
     title: "Panmoa 2.0公開：新しい議論の時代へ",
     content:
       "新しいアーキテクチャでは、すばやく整理された議論を最優先にしました。ボードは動的になり、ナビゲーションも分かりやすく、情報量を保ちながら視覚的なノイズを抑えています。",
@@ -161,6 +166,7 @@ export const demoPosts: Post[] = [
     board: { slug: "game", name: "ゲーム", icon: "sports_esports" },
     author_id: "dev",
     author: { username: "StackWatcher", avatar_url: null },
+    guest_name: null,
     title: "今日の投票：いま最も重視しているフレームワークは？",
     content:
       "何を開発しているのか、チームがその選択をした理由も教えてください。",
@@ -181,6 +187,7 @@ export const demoComments: Comment[] = [
     post_id: "cat-chef",
     author_id: "remote",
     author: { username: "RemoteWorker", avatar_url: null },
+    guest_name: null,
     parent_id: null,
     content: "盛り付けが完璧だとシェフにお伝えください。",
     created_at: iso(0.6),
@@ -190,6 +197,7 @@ export const demoComments: Comment[] = [
     post_id: "cat-chef",
     author_id: "catlover",
     author: { username: "CatLover99", avatar_url: null },
+    guest_name: null,
     parent_id: "comment-1",
     content: "お褒めの言葉を受け取り、報酬としてマグロを1匹ご希望です。",
     created_at: iso(0.3),
@@ -202,6 +210,7 @@ export const demoNotifications: Notification[] = [
     recipient_id: "admin",
     actor_id: "catlover",
     actor: { username: "CatLover99", avatar_url: null },
+    actor_name: null,
     type: "vote",
     post_id: "welcome",
     post: {
@@ -217,6 +226,7 @@ export const demoNotifications: Notification[] = [
     recipient_id: "catlover",
     actor_id: "remote",
     actor: { username: "RemoteWorker", avatar_url: null },
+    actor_name: null,
     type: "comment",
     post_id: "cat-chef",
     post: {

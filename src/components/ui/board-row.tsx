@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCompact, formatDate } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
+import { displayAuthorName } from "@/lib/author";
 import type { Post } from "@/lib/types";
 
 export function BoardRow({
@@ -36,7 +37,7 @@ export function BoardRow({
         )}
       </div>
       <div className="hidden truncate text-body-sm text-on-surface-variant md:block">
-        {post.author?.username ?? "メンバー"}
+        {displayAuthorName(post)}
       </div>
       <div className="hidden text-center text-body-sm text-text-muted md:block">
         {formatDate(post.created_at).slice(0, 5)}

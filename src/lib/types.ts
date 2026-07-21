@@ -24,8 +24,9 @@ export type Post = {
   id: string;
   board_id: string;
   board?: Pick<Board, "slug" | "name" | "icon">;
-  author_id: string;
+  author_id: string | null;
   author?: Pick<Profile, "username" | "avatar_url">;
+  guest_name: string | null;
   title: string;
   content: string;
   thumbnail_url: string | null;
@@ -41,8 +42,9 @@ export type Post = {
 export type Comment = {
   id: string;
   post_id: string;
-  author_id: string;
+  author_id: string | null;
   author?: Pick<Profile, "username" | "avatar_url">;
+  guest_name: string | null;
   parent_id: string | null;
   content: string;
   created_at: string;
@@ -53,6 +55,7 @@ export type Notification = {
   recipient_id: string;
   actor_id: string | null;
   actor?: Pick<Profile, "username" | "avatar_url"> | null;
+  actor_name: string | null;
   type: "comment" | "vote";
   post_id: string;
   post?: {

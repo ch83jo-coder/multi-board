@@ -20,24 +20,85 @@ async function getActor() {
   return { user: data.user, role: profile?.role ?? "member" };
 }
 
+function getGuestCredentials(formData: FormData) {
+  const guestName =
+    String(formData.get("guestName") ?? "").trim() || "名無しさん";
+  const guestPassword = String(formData.get("guestPassword") ?? "");
+  if (guestName.length > 30)
+    return { error: "お名前は30文字以内で入力してください。" } as const;
+  if (guestPassword.length < 4 || guestPassword.length > 128)
+    return { error: "パスワードは4〜128文字で入力してください。" } as const;
+  return { guestName, guestPassword };
+}
+
+const demoMutationError = {
+  error: "Supabaseの接続設定後に投稿・コメント機能を利用できます。",
+};
+
 export async function savePost(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const actor = await getActor();
-  if (!actor) return { error: "投稿するにはログインしてください。" };
-  const { user, role } = actor;
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   const boardId = String(formData.get("boardId") ?? "");
   const slug = String(formData.get("slug") ?? "");
   const postId = String(formData.get("postId") ?? "");
+  const guestMode = formData.get("guestMode") === "true";
   const image = formData.get("image");
   if (title.length < 3 || content.length < 10)
     return {
       error: "タイトルは3文字以上、本文は10文字以上で入力してください。",
     };
+  if (!hasSupabaseEnv()) return demoMutationError;
+
   const supabase = await createClient();
+  if (guestMode) {
+    const credentials = getGuestCredentials(formData);
+    if ("error" in credentials) return credentials;
+
+    if (postId) {
+      const { data, error } = await supabase.rpc("update_guest_post", {
+        target_post_id: postId,
+        guest_password: credentials.guestPassword,
+        post_title: title,
+        post_content: content,
+      });
+      if (error) {
+        console.error(
+          `[posts:guest-update] RPC failed (${error.code}): ${error.message}`,
+        );
+        return {
+          error: "投稿を更新できませんでした。もう一度お試しください。",
+        };
+      }
+      if (!data) return { error: "パスワードが正しくありません。" };
+      updateTag("home-sidebar");
+      revalidatePath(`/boards/${slug}/${postId}`);
+      redirect(`/boards/${slug}/${postId}`);
+    }
+
+    const { data, error } = await supabase.rpc("create_guest_post", {
+      target_board_id: boardId,
+      post_title: title,
+      post_content: content,
+      author_name: credentials.guestName,
+      guest_password: credentials.guestPassword,
+    });
+    if (error || !data) {
+      console.error(
+        `[posts:guest-create] RPC failed (${error?.code ?? "no-data"}): ${error?.message ?? "No post id returned"}`,
+      );
+      return { error: "投稿を保存できませんでした。もう一度お試しください。" };
+    }
+    updateTag("home-sidebar");
+    revalidatePath(`/boards/${slug}`);
+    redirect(`/boards/${slug}/${data}`);
+  }
+
+  const actor = await getActor();
+  if (!actor) return { error: "投稿するにはログインしてください。" };
+  const { user, role } = actor;
   let thumbnailUrl: string | undefined;
   if (image instanceof File && image.size > 0) {
     if (image.size > 5 * 1024 * 1024)
@@ -112,15 +173,44 @@ export async function addComment(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const actor = await getActor();
-  if (!actor) return { error: "コメントするにはログインしてください。" };
   const content = String(formData.get("content") ?? "").trim();
   const postId = String(formData.get("postId") ?? "");
   const slug = String(formData.get("slug") ?? "");
   const parentId = String(formData.get("parentId") ?? "") || null;
+  const guestMode = formData.get("guestMode") === "true";
   if (content.length < 2)
     return { error: "コメントは2文字以上で入力してください。" };
+  if (!hasSupabaseEnv()) return demoMutationError;
+
   const supabase = await createClient();
+  if (guestMode) {
+    const credentials = getGuestCredentials(formData);
+    if ("error" in credentials) return credentials;
+    const { error } = await supabase.rpc("create_guest_comment", {
+      target_post_id: postId,
+      target_parent_id: parentId,
+      comment_content: content,
+      author_name: credentials.guestName,
+      guest_password: credentials.guestPassword,
+    });
+    if (error) {
+      console.error(
+        `[comments:guest-create] RPC failed (${error.code}): ${error.message}`,
+      );
+      return {
+        error: parentId
+          ? "返信を保存できませんでした。返信先をご確認ください。"
+          : "コメントを保存できませんでした。もう一度お試しください。",
+      };
+    }
+    revalidatePath(`/boards/${slug}/${postId}`);
+    return {
+      success: parentId ? "返信を投稿しました。" : "コメントを投稿しました。",
+    };
+  }
+
+  const actor = await getActor();
+  if (!actor) return { error: "コメントするにはログインしてください。" };
   if (parentId) {
     const { data: parent, error: parentError } = await supabase
       .from("comments")
@@ -206,6 +296,60 @@ export async function deleteComment(formData: FormData) {
     throw new Error("コメントを削除できませんでした。");
   }
   revalidatePath(`/boards/${slug}/${postId}`);
+}
+
+export async function deleteGuestPost(
+  _: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  if (!hasSupabaseEnv()) return demoMutationError;
+  const postId = String(formData.get("postId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const credentials = getGuestCredentials(formData);
+  if ("error" in credentials) return credentials;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("delete_guest_post", {
+    target_post_id: postId,
+    guest_password: credentials.guestPassword,
+  });
+  if (error) {
+    console.error(
+      `[posts:guest-delete] RPC failed (${error.code}): ${error.message}`,
+    );
+    return { error: "投稿を削除できませんでした。もう一度お試しください。" };
+  }
+  if (!data) return { error: "パスワードが正しくありません。" };
+  updateTag("home-sidebar");
+  revalidatePath(`/boards/${slug}`);
+  redirect(`/boards/${slug}`);
+}
+
+export async function deleteGuestComment(
+  _: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  if (!hasSupabaseEnv()) return demoMutationError;
+  const commentId = String(formData.get("commentId") ?? "");
+  const postId = String(formData.get("postId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const credentials = getGuestCredentials(formData);
+  if ("error" in credentials) return credentials;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("delete_guest_comment", {
+    target_comment_id: commentId,
+    guest_password: credentials.guestPassword,
+  });
+  if (error) {
+    console.error(
+      `[comments:guest-delete] RPC failed (${error.code}): ${error.message}`,
+    );
+    return {
+      error: "コメントを削除できませんでした。もう一度お試しください。",
+    };
+  }
+  if (!data) return { error: "パスワードが正しくありません。" };
+  revalidatePath(`/boards/${slug}/${postId}`);
+  return { success: "コメントを削除しました。" };
 }
 
 async function togglePostFlag(

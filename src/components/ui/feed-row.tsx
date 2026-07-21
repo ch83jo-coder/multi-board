@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Chip } from "@/components/ui/chip";
 import { MaterialIcon } from "@/components/ui/material-icon";
+import { displayAuthorName } from "@/lib/author";
 import type { Post } from "@/lib/types";
 
 export function FeedRow({ post }: { post: Post }) {
@@ -28,8 +29,8 @@ export function FeedRow({ post }: { post: Post }) {
           {post.title}
         </Link>
         <p className="line-clamp-1 text-body-sm text-text-muted">
-          {post.author?.username ?? "メンバー"} · {formatDate(post.created_at)}{" "}
-          · コメント {post.comment_count}件
+          {displayAuthorName(post)} · {formatDate(post.created_at)} · コメント{" "}
+          {post.comment_count}件
         </p>
       </div>
       {post.thumbnail_url && (
