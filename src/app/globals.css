@@ -5,12 +5,12 @@
   box-sizing: border-box;
 }
 html {
-  background: #fbf9f8;
+  background: #f8fafc;
 }
 body {
   margin: 0;
-  background: #fbf9f8;
-  color: #1b1c1c;
+  background: #f8fafc;
+  color: #0f172a;
   font-family: var(--font-inter), var(--font-noto-jp), Inter, sans-serif;
 }
 a {
@@ -59,6 +59,6 @@ a {
   border-radius: 10px;
 }
 ::selection {
-  background: #dce1ff;
-  color: #001551;
+  background: #dbeafe;
+  color: #1e3a8a;
 }

@@ -7,8 +7,9 @@ import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
 import { VoteButtons } from "@/components/forms/vote-buttons";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chip";
 import { formatDate } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import {
@@ -56,16 +57,8 @@ export default async function PostPage({ params }: Props) {
       <Card className="overflow-hidden">
         <header className="border-b border-border-subtle p-5 md:p-7">
           <div className="flex items-center gap-2 text-body-sm text-text-muted">
-            {post.is_notice && (
-              <span className="rounded bg-secondary px-2 py-0.5 font-label-sm text-white">
-                お知らせ
-              </span>
-            )}
-            {post.is_pinned && (
-              <span className="rounded bg-primary px-2 py-0.5 font-label-sm text-white">
-                固定
-              </span>
-            )}
+            {post.is_notice && <Chip tone="success">お知らせ</Chip>}
+            {post.is_pinned && <Chip tone="primary">固定</Chip>}
             <span>{formatDate(post.created_at)}</span>
             <span>·</span>
             <span>閲覧 {viewCount}回</span>
@@ -89,14 +82,14 @@ export default async function PostPage({ params }: Props) {
               <div className="flex gap-2">
                 <Link
                   href={`/boards/${slug}/${postId}/edit`}
-                  className="inline-flex min-h-10 items-center justify-center rounded border border-border-subtle bg-white px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-alt"
+                  className={buttonStyles({ variant: "outline" })}
                 >
                   編集
                 </Link>
                 <form action={deletePost}>
                   <input type="hidden" name="postId" value={postId} />
                   <input type="hidden" name="slug" value={slug} />
-                  <Button type="submit" variant="danger">
+                  <Button type="submit" variant="destructive">
                     削除
                   </Button>
                 </form>
@@ -113,7 +106,7 @@ export default async function PostPage({ params }: Props) {
                   name="active"
                   value={String(post.is_pinned)}
                 />
-                <Button type="submit" variant="ghost">
+                <Button type="submit" variant="outline" size="sm">
                   {post.is_pinned ? "固定を解除" : "固定する"}
                 </Button>
               </form>
@@ -125,7 +118,7 @@ export default async function PostPage({ params }: Props) {
                   name="active"
                   value={String(post.is_notice)}
                 />
-                <Button type="submit" variant="ghost">
+                <Button type="submit" variant="outline" size="sm">
                   {post.is_notice ? "お知らせを解除" : "お知らせに設定"}
                 </Button>
               </form>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonStyles } from "@/components/ui/button";
 
 export function Pagination({
   current = 1,
@@ -22,7 +23,14 @@ export function Pagination({
     >
       <Link
         href={href(Math.max(1, current - 1))}
-        className="rounded border border-border-subtle bg-white px-3 py-2 text-body-sm text-text-muted hover:border-primary"
+        aria-label="前のページ"
+        aria-disabled={current === 1}
+        tabIndex={current === 1 ? -1 : undefined}
+        className={buttonStyles({
+          variant: "outline",
+          size: "icon-sm",
+          className: current === 1 ? "pointer-events-none opacity-50" : "",
+        })}
       >
         ‹
       </Link>
@@ -31,14 +39,24 @@ export function Pagination({
           key={page}
           href={href(page)}
           aria-current={page === current ? "page" : undefined}
-          className={`rounded border px-3 py-2 text-body-sm ${page === current ? "border-primary bg-primary text-white" : "border-border-subtle bg-white text-text-muted hover:border-primary"}`}
+          className={buttonStyles({
+            variant: page === current ? "default" : "outline",
+            size: "icon-sm",
+          })}
         >
           {page}
         </Link>
       ))}
       <Link
         href={href(Math.min(pages, current + 1))}
-        className="rounded border border-border-subtle bg-white px-3 py-2 text-body-sm text-text-muted hover:border-primary"
+        aria-label="次のページ"
+        aria-disabled={current === pages}
+        tabIndex={current === pages ? -1 : undefined}
+        className={buttonStyles({
+          variant: "outline",
+          size: "icon-sm",
+          className: current === pages ? "pointer-events-none opacity-50" : "",
+        })}
       >
         ›
       </Link>

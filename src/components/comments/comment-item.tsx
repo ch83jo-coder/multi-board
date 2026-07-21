@@ -4,6 +4,7 @@ import { useState } from "react";
 import { deleteComment } from "@/app/actions/posts";
 import { CommentForm } from "@/components/forms/comment-form";
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/components/ui/feed-row";
 import type { Comment } from "@/lib/types";
 
@@ -42,25 +43,23 @@ export function CommentItem({
         </p>
         <div className="mt-2 flex items-center gap-3">
           {!comment.parent_id && (
-            <button
+            <Button
               type="button"
               onClick={() => setReplying((value) => !value)}
-              className="font-label-sm text-label-sm text-primary hover:underline"
+              variant="link"
+              size="sm"
             >
               {replying ? "返信を閉じる" : "返信"}
-            </button>
+            </Button>
           )}
           {canDelete && (
             <form action={deleteComment}>
               <input type="hidden" name="commentId" value={comment.id} />
               <input type="hidden" name="postId" value={postId} />
               <input type="hidden" name="slug" value={slug} />
-              <button
-                type="submit"
-                className="font-label-sm text-label-sm text-error hover:underline"
-              >
+              <Button type="submit" variant="destructive-link" size="sm">
                 削除
-              </button>
+              </Button>
             </form>
           )}
         </div>

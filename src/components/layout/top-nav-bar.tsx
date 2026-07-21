@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { ProfileMenu } from "@/components/layout/profile-menu";
+import { buttonStyles } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import {
   getBoards,
@@ -42,17 +44,17 @@ export async function TopNavBar() {
           </nav>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
-          <form action="/search" className="relative hidden lg:block">
-            <input
+          <form action="/search" className="relative hidden w-64 lg:block">
+            <Input
               name="q"
               aria-label="投稿を検索"
-              className="w-64 rounded border border-transparent bg-surface-container px-4 py-2 pr-10 text-body-md outline-none focus:border-primary"
+              variant="subtle"
+              className="pr-10"
               placeholder="投稿を検索..."
             />
-            <MaterialIcon
-              name="search"
-              className="absolute right-3 top-2 text-text-muted"
-            />
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground">
+              <MaterialIcon name="search" className="text-[20px]" />
+            </span>
           </form>
           <NotificationBell
             notifications={notifications}
@@ -64,7 +66,7 @@ export async function TopNavBar() {
             <Link
               aria-label="ログイン"
               href="/login"
-              className="p-2 text-text-muted hover:text-primary"
+              className={buttonStyles({ variant: "ghost", size: "icon" })}
             >
               <MaterialIcon name="login" />
             </Link>

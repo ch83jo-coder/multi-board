@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BoardRow } from "@/components/ui/board-row";
-import { Button } from "@/components/ui/button";
+import { buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Pagination } from "@/components/ui/pagination";
@@ -58,29 +58,32 @@ export default async function BoardPage({ params, searchParams }: Props) {
             {board.description}
           </p>
         </div>
-        <Link href={`/boards/${slug}/write`}>
-          <Button>
-            <MaterialIcon name="edit" className="text-[18px]" />
-            新規投稿
-          </Button>
+        <Link
+          href={`/boards/${slug}/write`}
+          className={buttonStyles({ size: "lg" })}
+        >
+          <MaterialIcon name="edit" className="text-[18px]" />
+          新規投稿
         </Link>
       </header>
       <Card className="overflow-hidden">
-        <div className="flex items-center justify-end gap-1 border-b border-border-subtle bg-white px-4 py-3">
-          <Link
-            href={`/boards/${slug}?sort=popular`}
-            aria-current={sort === "popular" ? "page" : undefined}
-            className={`rounded px-3 py-1.5 font-label-md text-label-md ${sort === "popular" ? "bg-primary text-white" : "text-text-muted hover:bg-surface-alt hover:text-primary"}`}
-          >
-            人気
-          </Link>
-          <Link
-            href={`/boards/${slug}`}
-            aria-current={sort === "latest" ? "page" : undefined}
-            className={`rounded px-3 py-1.5 font-label-md text-label-md ${sort === "latest" ? "bg-primary text-white" : "text-text-muted hover:bg-surface-alt hover:text-primary"}`}
-          >
-            新着
-          </Link>
+        <div className="flex items-center justify-end border-b border-border-subtle bg-white px-4 py-3">
+          <div className="inline-flex rounded-lg bg-muted p-1">
+            <Link
+              href={`/boards/${slug}?sort=popular`}
+              aria-current={sort === "popular" ? "page" : undefined}
+              className={`rounded-md px-3 py-1.5 text-body-sm font-medium transition-colors ${sort === "popular" ? "bg-white text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface"}`}
+            >
+              人気
+            </Link>
+            <Link
+              href={`/boards/${slug}`}
+              aria-current={sort === "latest" ? "page" : undefined}
+              className={`rounded-md px-3 py-1.5 text-body-sm font-medium transition-colors ${sort === "latest" ? "bg-white text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface"}`}
+            >
+              新着
+            </Link>
+          </div>
         </div>
         <div className="hidden grid-cols-[60px_1fr_120px_100px_80px] border-b border-border-subtle bg-surface-alt px-4 py-3 font-label-md text-label-md text-text-muted md:grid">
           <div className="text-center">番号</div>

@@ -7,13 +7,13 @@ export function Chip({
 }) {
   const style =
     tone === "primary"
-      ? "bg-primary text-white"
+      ? "border-primary/20 bg-accent text-accent-foreground"
       : tone === "success"
-        ? "bg-secondary text-white"
-        : "bg-surface-container text-text-muted";
+        ? "border-secondary/20 bg-secondary-container text-on-secondary-container"
+        : "border-border bg-muted text-muted-foreground";
   return (
     <span
-      className={`inline-flex rounded px-2 py-1 font-label-sm text-label-sm ${style}`}
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-label-sm text-label-sm ${style}`}
     >
       {children}
     </span>

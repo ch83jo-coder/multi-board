@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { votePost } from "@/app/actions/posts";
+import { Button } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
 
 export function VoteButtons({
@@ -33,27 +34,29 @@ export function VoteButtons({
     });
   return (
     <div className="flex flex-col items-center gap-2">
-      <button
+      <Button
         type="button"
         disabled={pending}
         onClick={() => vote(1)}
         aria-label="賛成票を入れる"
         aria-pressed={currentVote === 1}
-        className={`rounded border border-border-subtle p-2 hover:bg-primary-fixed ${currentVote === 1 ? "bg-primary-fixed text-primary" : "text-text-muted"}`}
+        variant={currentVote === 1 ? "active" : "outline"}
+        size="icon"
       >
         <MaterialIcon name="expand_less" />
-      </button>
-      <strong className="text-lg">{currentCount}</strong>
-      <button
+      </Button>
+      <strong className="text-lg text-on-surface">{currentCount}</strong>
+      <Button
         type="button"
         disabled={pending}
         onClick={() => vote(-1)}
         aria-label="反対票を入れる"
         aria-pressed={currentVote === -1}
-        className={`rounded border border-border-subtle p-2 hover:bg-primary-fixed ${currentVote === -1 ? "bg-primary-fixed text-primary" : "text-text-muted"}`}
+        variant={currentVote === -1 ? "active" : "outline"}
+        size="icon"
       >
         <MaterialIcon name="expand_more" />
-      </button>
+      </Button>
       {message && (
         <span className="max-w-24 text-center text-[10px] text-text-muted">
           {message}

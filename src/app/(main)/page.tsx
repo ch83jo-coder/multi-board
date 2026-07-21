@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BoardLinkGrid } from "@/components/boards/board-link-grid";
 import { Hero } from "@/components/home/hero";
 import { RightSidebar } from "@/components/home/right-sidebar";
 import { FeedRow } from "@/components/ui/feed-row";
@@ -42,14 +43,34 @@ export default async function HomePage({
     <div className="flex gap-gutter">
       <div className="min-w-0 flex-1 space-y-6">
         <Hero post={heroPost} boards={boards} />
+        <section
+          className="space-y-3 md:hidden"
+          aria-labelledby="mobile-boards"
+        >
+          <div className="flex items-center justify-between">
+            <h2
+              id="mobile-boards"
+              className="font-headline-md text-headline-md"
+            >
+              掲示板
+            </h2>
+            <Link
+              href="/boards"
+              className="text-body-sm font-semibold text-primary hover:underline"
+            >
+              すべて見る
+            </Link>
+          </div>
+          <BoardLinkGrid boards={boards} />
+        </section>
         <div className="flex items-center border-b border-border-subtle pb-4">
-          <div className="flex gap-4">
+          <div className="inline-flex rounded-lg bg-muted p-1">
             {sortTabs.map((tab) => (
               <Link
                 key={tab.value}
                 href={tab.value === "trending" ? "/" : `/?sort=${tab.value}`}
                 aria-current={sort === tab.value ? "page" : undefined}
-                className={`flex items-center gap-1 font-label-md text-label-md ${sort === tab.value ? "text-primary" : "text-text-muted hover:text-primary"}`}
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-body-sm font-medium transition-colors ${sort === tab.value ? "bg-white text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface"}`}
               >
                 {tab.icon && (
                   <MaterialIcon name={tab.icon} className="text-sm" />

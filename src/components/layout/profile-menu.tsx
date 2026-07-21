@@ -5,6 +5,7 @@ import { useState } from "react";
 import { logout } from "@/app/actions/auth";
 import { useDismissibleMenu } from "@/components/layout/use-dismissible-menu";
 import { Avatar } from "@/components/ui/avatar";
+import { buttonStyles } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import type { Profile } from "@/lib/types";
 
@@ -20,7 +21,10 @@ export function ProfileMenu({ viewer }: { viewer: Profile }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="rounded-full p-1 hover:bg-surface-alt"
+        className={buttonStyles({
+          variant: "ghost",
+          size: "icon",
+        })}
       >
         <Avatar username={viewer.username} url={viewer.avatar_url} size="sm" />
       </button>
@@ -51,7 +55,7 @@ export function ProfileMenu({ viewer }: { viewer: Profile }) {
             <button
               type="submit"
               role="menuitem"
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-body-sm text-on-surface hover:bg-surface-alt"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-body-sm text-on-surface outline-none hover:bg-muted focus-visible:bg-muted"
             >
               <MaterialIcon name="logout" />
               ログアウト

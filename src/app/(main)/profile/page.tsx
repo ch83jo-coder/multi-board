@@ -50,7 +50,7 @@ export default async function ProfilePage() {
               </div>
             </div>
             <form action={logout}>
-              <Button type="submit" variant="ghost">
+              <Button type="submit" variant="outline">
                 <MaterialIcon name="logout" className="text-[18px]" />
                 ログアウト
               </Button>

@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { MaterialIcon } from "@/components/ui/material-icon";
-import { getBoards, getViewer } from "@/lib/data";
+import { getViewer } from "@/lib/data";
 
 export async function SideNav() {
-  const [boards, viewer] = await Promise.all([getBoards(), getViewer()]);
-  const writeHref = boards[0] ? `/boards/${boards[0].slug}/write` : "/login";
+  const viewer = await getViewer();
   const links: [string, string, string][] = [
     ["leaderboard", "ランキング", "/?sort=top"],
     ["trending_up", "人気", "/"],
@@ -21,14 +20,7 @@ export async function SideNav() {
         <p className="mt-1 text-body-sm text-text-muted">
           Panmoaの注目トピック
         </p>
-        <Link
-          href={writeHref}
-          className="mt-6 flex items-center justify-center gap-2 rounded bg-primary py-2.5 font-label-md text-label-md text-white hover:bg-primary-container"
-        >
-          <MaterialIcon name="add_circle" className="text-[18px]" />
-          新規投稿
-        </Link>
-        <nav className="mt-5 flex-1 space-y-1">
+        <nav className="mt-6 flex-1 space-y-1">
           {links.map(([icon, label, href]) => (
             <Link
               key={label}

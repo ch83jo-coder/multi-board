@@ -4,6 +4,7 @@ import { BoardForm } from "@/components/forms/board-form";
 import { TopNavBar } from "@/components/layout/top-nav-bar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chip";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { getBoards, getViewer } from "@/lib/data";
 
@@ -45,11 +46,9 @@ export default async function AdminBoardsPage() {
                       /{board.slug}
                     </span>
                   </p>
-                  <span
-                    className={`rounded px-2 py-1 text-label-sm ${board.is_active ? "bg-success-light text-secondary" : "bg-surface-container text-text-muted"}`}
-                  >
+                  <Chip tone={board.is_active ? "success" : "neutral"}>
                     {board.is_active ? "有効" : "無効"}
-                  </span>
+                  </Chip>
                 </div>
                 <BoardForm board={board} />
                 <form action={toggleBoard} className="flex justify-end">
@@ -59,7 +58,7 @@ export default async function AdminBoardsPage() {
                     name="active"
                     value={String(board.is_active)}
                   />
-                  <Button type="submit" variant="ghost">
+                  <Button type="submit" variant="outline" size="sm">
                     {board.is_active ? "無効にする" : "有効にする"}
                   </Button>
                 </form>

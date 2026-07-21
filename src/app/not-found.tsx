@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonStyles } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -13,7 +14,10 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex rounded bg-primary px-5 py-2.5 font-label-md text-white"
+          className={buttonStyles({
+            size: "lg",
+            className: "mt-6",
+          })}
         >
           ホームへ戻る
         </Link>

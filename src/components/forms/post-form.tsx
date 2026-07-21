@@ -49,7 +49,7 @@ export function PostForm({ board, post }: { board: Board; post?: Post }) {
           name="image"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          className="file:mr-3 file:rounded file:border-0 file:bg-primary-fixed file:px-3 file:py-1.5 file:text-primary"
+          className="file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:font-semibold file:text-on-surface hover:file:bg-surface-container-high"
         />
         <span className="mt-1 block text-label-sm text-text-muted">
           JPG、PNG、WebP・最大5MB

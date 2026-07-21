@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { markNotificationsRead } from "@/app/actions/notifications";
 import { useDismissibleMenu } from "@/components/layout/use-dismissible-menu";
 import { Avatar } from "@/components/ui/avatar";
+import { buttonStyles } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import type { Notification } from "@/lib/types";
 
@@ -50,11 +51,15 @@ export function NotificationBell({
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={toggle}
-        className="relative p-2 text-text-muted hover:text-primary"
+        className={buttonStyles({
+          variant: "ghost",
+          size: "icon",
+          className: "relative",
+        })}
       >
         <MaterialIcon name="notifications" />
         {visibleUnreadCount > 0 && (
-          <span className="absolute right-0 top-0 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[9px] font-bold leading-4 text-white">
+          <span className="absolute right-0 top-0 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold leading-4 text-destructive-foreground ring-2 ring-white">
             {visibleUnreadCount > 9 ? "9+" : visibleUnreadCount}
           </span>
         )}
