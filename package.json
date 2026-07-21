@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "seed": "node --env-file=.env.local tools/init_data/index.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome format --write ."
