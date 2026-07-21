@@ -20,6 +20,40 @@ import type {
 } from "@/lib/types";
 
 export const POSTS_PER_PAGE = 20;
+const HOME_SIDEBAR_LIMIT = 5;
+const TRENDING_POST_LIMIT = 200;
+const TRENDING_STOP_WORDS = new Set([
+  "ある",
+  "いる",
+  "おすすめ",
+  "これ",
+  "この",
+  "こと",
+  "した",
+  "して",
+  "する",
+  "その",
+  "ため",
+  "です",
+  "できる",
+  "という",
+  "ない",
+  "なる",
+  "について",
+  "みんな",
+  "もの",
+  "よう",
+  "今日",
+  "今回",
+  "最近",
+  "情報",
+  "投稿",
+  "教えて",
+  "質問",
+]);
+
+type BoardPostAggregate = Board & { posts?: { count: number }[] };
+type KeywordSource = Pick<Post, "title">;
 
 export function parseHomeSort(value?: string): HomeSort {
   return value === "latest" || value === "top" ? value : "trending";
@@ -52,6 +86,64 @@ function orderComments(comments: Comment[]) {
     .flatMap((comment) => [comment, ...(replies.get(comment.id) ?? [])]);
 }
 
+function normalizeKeyword(value: string) {
+  const label = value
+    .normalize("NFKC")
+    .replace(/^#+/, "")
+    .replace(/[^\p{L}\p{N}_ー-]/gu, "")
+    .trim();
+  if (
+    label.length < 2 ||
+    label.length > 30 ||
+    /^\d+$/u.test(label) ||
+    TRENDING_STOP_WORDS.has(label.toLocaleLowerCase("ja-JP"))
+  )
+    return null;
+  return { key: label.toLocaleLowerCase("ja-JP"), label };
+}
+
+function extractHashtags(text: string) {
+  return [...text.matchAll(/#[\p{L}\p{N}_ー-]{2,30}/gu)]
+    .map((match) => normalizeKeyword(match[0]))
+    .filter((keyword) => keyword !== null);
+}
+
+function extractTitleKeywords(title: string) {
+  const withoutHashtags = title.replace(/#[\p{L}\p{N}_ー-]{2,30}/gu, " ");
+  const segmenter = new Intl.Segmenter("ja", { granularity: "word" });
+  return [...segmenter.segment(withoutHashtags)]
+    .filter((segment) => segment.isWordLike)
+    .map((segment) => normalizeKeyword(segment.segment))
+    .filter((keyword) => keyword !== null);
+}
+
+function rankTrendingKeywords(posts: KeywordSource[]) {
+  const scores = new Map<
+    string,
+    { label: string; score: number; postCount: number }
+  >();
+  for (const post of posts) {
+    const weights = new Map<string, { label: string; weight: number }>();
+    for (const keyword of extractTitleKeywords(post.title))
+      weights.set(keyword.key, { label: keyword.label, weight: 1 });
+    for (const keyword of extractHashtags(post.title))
+      weights.set(keyword.key, { label: keyword.label, weight: 5 });
+
+    for (const [key, keyword] of weights) {
+      const current = scores.get(key);
+      scores.set(key, {
+        label: current?.label ?? keyword.label,
+        score: (current?.score ?? 0) + keyword.weight,
+        postCount: (current?.postCount ?? 0) + 1,
+      });
+    }
+  }
+  return [...scores.values()]
+    .sort((a, b) => b.score - a.score || b.postCount - a.postCount)
+    .slice(0, HOME_SIDEBAR_LIMIT)
+    .map((keyword) => keyword.label);
+}
+
 const getCachedActiveBoards = unstable_cache(
   async (): Promise<Board[]> => {
     const supabase = getAnonymousClient();
@@ -68,6 +160,55 @@ const getCachedActiveBoards = unstable_cache(
   },
   ["active-boards"],
   { revalidate: 300, tags: ["boards"] },
+);
+
+const getCachedPopularBoards = unstable_cache(
+  async (): Promise<Board[]> => {
+    const supabase = getAnonymousClient();
+    const { data, error } = await supabase
+      .from("boards")
+      .select("*, posts(count)")
+      .eq("is_active", true);
+    if (error) {
+      logQueryError("getCachedPopularBoards", error);
+      throw new Error("Popular boards could not be loaded.");
+    }
+    return (data as unknown as BoardPostAggregate[])
+      .map(({ posts, ...board }) => ({
+        ...board,
+        post_count: posts?.[0]?.count ?? 0,
+      }))
+      .sort(
+        (a, b) =>
+          (b.post_count ?? 0) - (a.post_count ?? 0) ||
+          a.sort_order - b.sort_order,
+      )
+      .slice(0, HOME_SIDEBAR_LIMIT);
+  },
+  ["popular-boards"],
+  { revalidate: 300, tags: ["boards", "home-sidebar"] },
+);
+
+const getCachedTrendingKeywords = unstable_cache(
+  async (): Promise<string[]> => {
+    const supabase = getAnonymousClient();
+    const sevenDaysAgo = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const { data, error } = await supabase
+      .from("posts")
+      .select("title")
+      .gte("created_at", sevenDaysAgo)
+      .order("created_at", { ascending: false })
+      .limit(TRENDING_POST_LIMIT);
+    if (error) {
+      logQueryError("getCachedTrendingKeywords", error);
+      throw new Error("Trending keywords could not be loaded.");
+    }
+    return rankTrendingKeywords(data as KeywordSource[]);
+  },
+  ["trending-keywords-v3"],
+  { revalidate: 300, tags: ["home-sidebar"] },
 );
 
 export const getBoards = cache(
@@ -96,6 +237,37 @@ export const getBoards = cache(
     return data as Board[];
   },
 );
+
+export async function getPopularBoards(): Promise<Board[]> {
+  if (!hasSupabaseEnv())
+    return demoBoards
+      .filter((board) => board.is_active)
+      .sort(
+        (a, b) =>
+          (b.post_count ?? 0) - (a.post_count ?? 0) ||
+          a.sort_order - b.sort_order,
+      )
+      .slice(0, HOME_SIDEBAR_LIMIT);
+  try {
+    return await getCachedPopularBoards();
+  } catch {
+    return [];
+  }
+}
+
+export async function getTrendingKeywords(): Promise<string[]> {
+  if (!hasSupabaseEnv()) {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return rankTrendingKeywords(
+      demoPosts.filter((post) => Date.parse(post.created_at) >= sevenDaysAgo),
+    );
+  }
+  try {
+    return await getCachedTrendingKeywords();
+  } catch {
+    return [];
+  }
+}
 
 export async function getHomePosts(
   sort: HomeSort = "trending",

@@ -9,6 +9,8 @@ import {
   getBoards,
   getHomePostCount,
   getHomePosts,
+  getPopularBoards,
+  getTrendingKeywords,
   POSTS_PER_PAGE,
   parseHomeSort,
 } from "@/lib/data";
@@ -31,11 +33,14 @@ export default async function HomePage({
   const requestedPage = Number.isFinite(parsedPage)
     ? Math.max(1, Math.floor(parsedPage))
     : 1;
-  const [total, boards, requestedPosts] = await Promise.all([
-    getHomePostCount(sort),
-    getBoards(),
-    getHomePosts(sort, requestedPage),
-  ]);
+  const [total, boards, popularBoards, trendingKeywords, requestedPosts] =
+    await Promise.all([
+      getHomePostCount(sort),
+      getBoards(),
+      getPopularBoards(),
+      getTrendingKeywords(),
+      getHomePosts(sort, requestedPage),
+    ]);
   const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
   const page = Math.min(requestedPage, pages);
   const posts =
@@ -97,7 +102,10 @@ export default async function HomePage({
           sort={sort === "trending" ? undefined : sort}
         />
       </div>
-      <RightSidebar boards={boards} />
+      <RightSidebar
+        boards={popularBoards}
+        trendingKeywords={trendingKeywords}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { hasSupabaseEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -67,6 +67,7 @@ export async function savePost(
     if (role !== "admin") query = query.eq("author_id", user.id);
     const { data, error } = await query.select("id").maybeSingle();
     if (error || !data) return { error: "投稿を更新できませんでした。" };
+    updateTag("home-sidebar");
     revalidatePath(`/boards/${slug}/${postId}`);
     redirect(`/boards/${slug}/${postId}`);
   }
@@ -82,6 +83,7 @@ export async function savePost(
     .select("id")
     .single();
   if (error || !data) return { error: "投稿を保存できませんでした。" };
+  updateTag("home-sidebar");
   revalidatePath(`/boards/${slug}`);
   redirect(`/boards/${slug}/${data.id}`);
 }
@@ -101,6 +103,7 @@ export async function deletePost(formData: FormData) {
     );
     throw new Error("投稿を削除できませんでした。");
   }
+  updateTag("home-sidebar");
   revalidatePath(`/boards/${slug}`);
   redirect(`/boards/${slug}`);
 }
