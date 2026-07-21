@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { hasSupabaseEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
@@ -26,6 +25,5 @@ export async function markNotificationsRead(): Promise<ActionState> {
     return { error: "通知を既読にできませんでした。もう一度お試しください。" };
   }
 
-  revalidatePath("/", "layout");
   return { success: "通知を既読にしました。" };
 }

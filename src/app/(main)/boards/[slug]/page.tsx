@@ -35,13 +35,17 @@ export default async function BoardPage({ params, searchParams }: Props) {
   const sort = parseBoardSort(query.sort);
   const board = await getBoard(slug);
   if (!board) notFound();
-  const [total, weekly] = await Promise.all([
+  const [total, weekly, requestedPosts] = await Promise.all([
     getBoardPostCount(board.id),
     getBoardBestPosts(board.id),
+    getBoardPosts(board.id, requestedPage, sort),
   ]);
   const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
   const page = Math.min(requestedPage, pages);
-  const posts = await getBoardPosts(board.id, page, sort);
+  const posts =
+    page === requestedPage
+      ? requestedPosts
+      : await getBoardPosts(board.id, page, sort);
   return (
     <div className="space-y-7">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">

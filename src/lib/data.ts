@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import {
   demoBoards,
@@ -6,6 +7,7 @@ import {
   demoPosts,
 } from "@/lib/demo-data";
 import { hasSupabaseEnv } from "@/lib/env";
+import { getAnonymousClient } from "@/lib/supabase/anonymous";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Board,
@@ -50,16 +52,43 @@ function orderComments(comments: Comment[]) {
     .flatMap((comment) => [comment, ...(replies.get(comment.id) ?? [])]);
 }
 
+const getCachedActiveBoards = unstable_cache(
+  async (): Promise<Board[]> => {
+    const supabase = getAnonymousClient();
+    const { data, error } = await supabase
+      .from("boards")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) {
+      logQueryError("getCachedActiveBoards", error);
+      throw new Error("Active boards could not be loaded.");
+    }
+    return data as Board[];
+  },
+  ["active-boards"],
+  { revalidate: 300, tags: ["boards"] },
+);
+
 export const getBoards = cache(
   async (includeInactive = false): Promise<Board[]> => {
     if (!hasSupabaseEnv())
       return includeInactive
         ? [...demoBoards]
         : demoBoards.filter((board) => board.is_active);
+    if (!includeInactive) {
+      try {
+        return await getCachedActiveBoards();
+      } catch {
+        return [];
+      }
+    }
+
     const supabase = await createClient();
-    let query = supabase.from("boards").select("*");
-    if (!includeInactive) query = query.eq("is_active", true);
-    const { data, error } = await query.order("sort_order");
+    const { data, error } = await supabase
+      .from("boards")
+      .select("*")
+      .order("sort_order");
     if (error) {
       logQueryError("getBoards", error);
       return [];
@@ -145,17 +174,21 @@ export async function getHomePostCount(
   return count ?? 0;
 }
 
-export async function getBoard(slug: string): Promise<Board | null> {
-  if (!hasSupabaseEnv())
-    return demoBoards.find((board) => board.slug === slug) ?? null;
-  const viewer = await getViewer();
+export const getBoard = cache(async (slug: string): Promise<Board | null> => {
+  if (!hasSupabaseEnv()) {
+    const board = demoBoards.find((candidate) => candidate.slug === slug);
+    return board?.is_active ? board : null;
+  }
   const supabase = await createClient();
-  let query = supabase.from("boards").select("*").eq("slug", slug);
-  if (viewer?.role !== "admin") query = query.eq("is_active", true);
-  const { data, error } = await query.maybeSingle();
+  const { data, error } = await supabase
+    .from("boards")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  // RLS exposes inactive boards only when the current viewer is an admin.
   if (error) logQueryError("getBoard", error);
   return data as Board | null;
-}
+});
 
 export async function getBoardPosts(
   boardId: string,
@@ -340,7 +373,7 @@ export async function incrementViewCount(
   postId: string,
 ): Promise<number | null> {
   if (!hasSupabaseEnv()) return null;
-  const supabase = await createClient();
+  const supabase = getAnonymousClient();
   const { data, error } = await supabase.rpc("increment_view_count", {
     target_post_id: postId,
   });

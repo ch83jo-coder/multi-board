@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import { deletePost, toggleNotice, togglePin } from "@/app/actions/posts";
 import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
@@ -42,7 +43,9 @@ export default async function PostPage({ params }: Props) {
     getMyVote(postId),
   ]);
   if (!post || post.board?.slug !== slug) notFound();
-  const viewCount = (await incrementViewCount(postId)) ?? post.view_count;
+  after(async () => {
+    await incrementViewCount(postId);
+  });
   const canEdit =
     viewer && (viewer.id === post.author_id || viewer.role === "admin");
   return (
@@ -61,7 +64,7 @@ export default async function PostPage({ params }: Props) {
             {post.is_pinned && <Chip tone="primary">固定</Chip>}
             <span>{formatDate(post.created_at)}</span>
             <span>·</span>
-            <span>閲覧 {viewCount}回</span>
+            <span>閲覧 {post.view_count}回</span>
           </div>
           <h1 className="mt-3 font-headline-lg text-headline-lg-mobile md:text-headline-lg">
             {post.title}

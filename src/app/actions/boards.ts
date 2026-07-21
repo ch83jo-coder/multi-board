@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { hasSupabaseEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -46,7 +46,9 @@ export async function saveBoard(
     ? await admin.from("boards").update(payload).eq("id", id)
     : await admin.from("boards").insert({ ...payload, is_active: true });
   if (result.error) return { error: "ボードを保存できませんでした。" };
+  updateTag("boards");
   revalidatePath("/");
+  revalidatePath("/boards");
   revalidatePath("/admin/boards");
   return { success: "ボードを保存しました。" };
 }
@@ -64,6 +66,8 @@ export async function toggleBoard(formData: FormData) {
     );
     throw new Error("ボードの状態を変更できませんでした。");
   }
+  updateTag("boards");
   revalidatePath("/admin/boards");
+  revalidatePath("/boards");
   revalidatePath("/");
 }

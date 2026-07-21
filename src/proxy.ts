@@ -4,6 +4,11 @@ import { hasSupabaseEnv } from "@/lib/env";
 
 export async function proxy(request: NextRequest) {
   if (!hasSupabaseEnv()) return NextResponse.next();
+  const hasSupabaseSession = request.cookies
+    .getAll()
+    .some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));
+  if (!hasSupabaseSession) return NextResponse.next();
+
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,

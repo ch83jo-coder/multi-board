@@ -34,7 +34,6 @@ export async function updateProfile(
           : "プロフィールを更新できませんでした。",
     };
   }
-  revalidatePath("/", "layout");
   revalidatePath("/profile");
   return { success: "プロフィールを更新しました。" };
 }

@@ -31,13 +31,15 @@ export default async function HomePage({
   const requestedPage = Number.isFinite(parsedPage)
     ? Math.max(1, Math.floor(parsedPage))
     : 1;
-  const [total, boards] = await Promise.all([
+  const [total, boards, requestedPosts] = await Promise.all([
     getHomePostCount(sort),
     getBoards(),
+    getHomePosts(sort, requestedPage),
   ]);
   const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
   const page = Math.min(requestedPage, pages);
-  const posts = await getHomePosts(sort, page);
+  const posts =
+    page === requestedPage ? requestedPosts : await getHomePosts(sort, page);
   const heroPost = posts.find((post) => post.id === "launch") ?? posts[0];
   return (
     <div className="flex gap-gutter">
