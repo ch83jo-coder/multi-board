@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { toggleBoard } from "@/app/actions/boards";
 import { BoardForm } from "@/components/forms/board-form";
@@ -7,6 +8,11 @@ import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { getBoards, getViewer } from "@/lib/data";
+
+export const metadata: Metadata = {
+  title: "ボード管理",
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminBoardsPage() {
   const [viewer, boards] = await Promise.all([getViewer(), getBoards(true)]);

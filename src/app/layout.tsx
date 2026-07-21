@@ -1,6 +1,13 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Hanken_Grotesk, Inter, Noto_Sans_JP } from "next/font/google";
+import { JsonLd } from "@/components/seo/json-ld";
+import {
+  absoluteUrl,
+  getSiteUrl,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+} from "@/lib/seo";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,23 +26,11 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
-const siteName = "Panmoa";
-const siteDescription = "活発で快適な交流のためのマルチボードコミュニティ。";
-const configuredSiteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
-  "http://localhost:3000";
-const metadataBase = new URL(
-  /^https?:\/\//.test(configuredSiteUrl)
-    ? configuredSiteUrl
-    : `https://${configuredSiteUrl}`,
-);
-
 export const metadata: Metadata = {
-  metadataBase,
-  applicationName: siteName,
-  title: { default: siteName, template: `%s | ${siteName}` },
-  description: siteDescription,
+  metadataBase: getSiteUrl(),
+  applicationName: SITE_NAME,
+  title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
   icons: {
     icon: [{ url: "/favicon.jpg", type: "image/jpeg" }],
     shortcut: ["/favicon.jpg"],
@@ -43,24 +38,42 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    siteName,
-    title: siteName,
-    description: siteDescription,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/favicon.jpg",
-        width: 1536,
-        height: 1024,
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
         alt: "Panmoaコミュニティ",
-        type: "image/jpeg",
+        type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteName,
-    description: siteDescription,
-    images: ["/favicon.jpg"],
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
+  },
+};
+
+const websiteStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": absoluteUrl("/#website"),
+  url: absoluteUrl("/"),
+  name: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  inLanguage: "ja-JP",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: absoluteUrl("/search?q={search_term_string}"),
+    },
+    "query-input": "required name=search_term_string",
   },
 };
 
@@ -90,6 +103,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <JsonLd id="website-json-ld" data={websiteStructuredData} />
         {children}
         <Analytics />
       </body>

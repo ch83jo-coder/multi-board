@@ -3,7 +3,18 @@ import { BoardLinkGrid } from "@/components/boards/board-link-grid";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { getBoards } from "@/lib/data";
 
-export const metadata: Metadata = { title: "掲示板一覧" };
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>;
+}): Promise<Metadata> {
+  const { mode } = await searchParams;
+  return {
+    title: mode === "write" ? "投稿先を選択" : "掲示板一覧",
+    alternates: { canonical: "/boards" },
+    ...(mode === "write" ? { robots: { index: false, follow: false } } : {}),
+  };
+}
 
 export default async function BoardsPage({
   searchParams,

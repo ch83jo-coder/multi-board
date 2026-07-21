@@ -3,7 +3,10 @@ import { FeedRow } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { searchPosts } from "@/lib/data";
 
-export const metadata: Metadata = { title: "投稿検索" };
+export const metadata: Metadata = {
+  title: "投稿検索",
+  robots: { index: false, follow: false },
+};
 
 export default async function SearchPage({
   searchParams,

@@ -8,6 +8,7 @@ import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
 import { GuestDeleteForm } from "@/components/forms/guest-delete-form";
 import { VoteButtons } from "@/components/forms/vote-buttons";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import {
   getViewer,
   incrementViewCount,
 } from "@/lib/data";
+import { absoluteUrl, createDescription } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ slug: string; postId: string }>;
@@ -30,9 +32,37 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, postId } = await params;
   const post = await getPost(postId);
+  if (!post || post.board?.slug !== slug)
+    return { title: "投稿", robots: { index: false } };
+
+  const canonical = `/boards/${slug}/${postId}`;
+  const description = createDescription(post.content, 160);
+  const authorName = displayAuthorName(post);
+  const images = post.thumbnail_url
+    ? [{ url: post.thumbnail_url, alt: post.title }]
+    : [{ url: "/opengraph-image", width: 1200, height: 630 }];
   return {
-    title: post?.board?.slug === slug ? post.title : "投稿",
-    description: post?.content.slice(0, 120),
+    title: post.title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      locale: "ja_JP",
+      siteName: "Panmoa",
+      title: post.title,
+      description,
+      url: canonical,
+      publishedTime: post.created_at,
+      modifiedTime: post.updated_at,
+      authors: [authorName],
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [post.thumbnail_url ?? "/opengraph-image"],
+    },
   };
 }
 
@@ -53,8 +83,57 @@ export default async function PostPage({ params }: Props) {
     viewer && (viewer.id === post.author_id || viewer.role === "admin"),
   );
   const canEdit = post.author_id === null || canManageDirectly;
+  const canonicalUrl = absoluteUrl(`/boards/${slug}/${postId}`);
+  const discussionStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "DiscussionForumPosting",
+    "@id": canonicalUrl,
+    url: canonicalUrl,
+    mainEntityOfPage: canonicalUrl,
+    headline: post.title,
+    text: createDescription(post.content, 500),
+    author: {
+      "@type": "Person",
+      name: authorName,
+    },
+    datePublished: post.created_at,
+    dateModified: post.updated_at,
+    commentCount: post.comment_count,
+    interactionStatistic: [
+      {
+        "@type": "InteractionCounter",
+        interactionType: "https://schema.org/CommentAction",
+        userInteractionCount: Math.max(0, post.comment_count),
+      },
+      {
+        "@type": "InteractionCounter",
+        interactionType: "https://schema.org/LikeAction",
+        userInteractionCount: Math.max(0, post.vote_count),
+      },
+    ],
+    ...(post.thumbnail_url ? { image: post.thumbnail_url } : {}),
+    isPartOf: {
+      "@type": "DiscussionForum",
+      name: `${post.board?.name ?? slug}掲示板`,
+      url: absoluteUrl(`/boards/${slug}`),
+    },
+    comment: comments.slice(0, 5).map((comment) => ({
+      "@type": "Comment",
+      url: `${canonicalUrl}#comment-${comment.id}`,
+      text: createDescription(comment.content, 300),
+      dateCreated: comment.created_at,
+      author: {
+        "@type": "Person",
+        name: displayAuthorName(comment),
+      },
+    })),
+  };
   return (
     <div className="space-y-5">
+      <JsonLd
+        id="discussion-forum-posting-json-ld"
+        data={discussionStructuredData}
+      />
       <nav className="flex items-center gap-2 text-body-sm text-text-muted">
         <Link href={`/boards/${slug}`} className="hover:text-primary">
           {post.board?.name ?? slug}

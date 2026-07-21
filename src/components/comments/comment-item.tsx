@@ -27,6 +27,7 @@ export function CommentItem({
   const authorName = displayAuthorName(comment);
   return (
     <div
+      id={`comment-${comment.id}`}
       className={`flex gap-3 py-4 ${comment.parent_id ? "ml-8 border-l-2 border-primary-fixed pl-4" : ""}`}
     >
       <Avatar
