@@ -21,6 +21,15 @@ export function BoardRow({ post, slug }: { post: Post; slug: string }) {
             <Chip tone="success">お知らせ</Chip>
           </span>
         )}
+        {post.is_pinned && (
+          <span
+            aria-hidden="true"
+            title="固定投稿"
+            className="flex rotate-45 shrink-0 items-center text-secondary"
+          >
+            <MaterialIcon name="push_pin" className="text-[18px]" />
+          </span>
+        )}
         <Link
           href={`/boards/${slug}/${post.id}`}
           className="min-w-0 truncate text-body-md font-medium hover:text-primary"
