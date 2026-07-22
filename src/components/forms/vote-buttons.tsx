@@ -34,31 +34,35 @@ export function VoteButtons({
     });
   return (
     <div className="flex flex-col items-center gap-2">
-      <Button
-        type="button"
-        disabled={pending}
-        onClick={() => vote(1)}
-        aria-label="賛成票を入れる"
-        aria-pressed={currentVote === 1}
-        variant={currentVote === 1 ? "active" : "outline"}
-        size="icon"
-      >
-        <MaterialIcon name="expand_less" />
-      </Button>
-      <strong className="text-lg text-on-surface">{currentCount}</strong>
-      <Button
-        type="button"
-        disabled={pending}
-        onClick={() => vote(-1)}
-        aria-label="反対票を入れる"
-        aria-pressed={currentVote === -1}
-        variant={currentVote === -1 ? "active" : "outline"}
-        size="icon"
-      >
-        <MaterialIcon name="expand_more" />
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button
+          type="button"
+          disabled={pending}
+          onClick={() => vote(1)}
+          aria-label="賛成票を入れる"
+          aria-pressed={currentVote === 1}
+          variant={currentVote === 1 ? "active" : "outline"}
+          size="icon"
+        >
+          <MaterialIcon name="expand_less" />
+        </Button>
+        <strong className="min-w-6 text-center text-lg text-on-surface">
+          {currentCount}
+        </strong>
+        <Button
+          type="button"
+          disabled={pending}
+          onClick={() => vote(-1)}
+          aria-label="反対票を入れる"
+          aria-pressed={currentVote === -1}
+          variant={currentVote === -1 ? "active" : "outline"}
+          size="icon"
+        >
+          <MaterialIcon name="expand_more" />
+        </Button>
+      </div>
       {message && (
-        <span className="max-w-24 text-center text-[10px] text-text-muted">
+        <span className="text-center text-[10px] text-text-muted">
           {message}
         </span>
       )}
