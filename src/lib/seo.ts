@@ -1,21 +1,28 @@
 export const SITE_NAME = "Panmoa";
 export const SITE_DESCRIPTION =
   "活発で快適な交流のためのマルチボードコミュニティ。";
+export const SITE_ORIGIN = "https://panmoa.com";
+export const SITE_REDIRECT_HOSTS = [
+  "www.panmoa.com",
+  "multi-board-eight.vercel.app",
+] as const;
+
+export function isSiteRedirectHost(hostname: string) {
+  return SITE_REDIRECT_HOSTS.some((host) => host === hostname.toLowerCase());
+}
 
 export function getSiteUrl() {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
-    "http://localhost:3000";
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || SITE_ORIGIN;
   const normalizedUrl = /^https?:\/\//.test(configuredUrl)
     ? configuredUrl
     : `https://${configuredUrl}`;
 
   try {
     const url = new URL(normalizedUrl);
+    if (isSiteRedirectHost(url.hostname)) return new URL(SITE_ORIGIN);
     return new URL(url.origin);
   } catch {
-    return new URL("http://localhost:3000");
+    return new URL(SITE_ORIGIN);
   }
 }
 

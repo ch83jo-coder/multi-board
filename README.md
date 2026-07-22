@@ -26,7 +26,7 @@ cp .env.example .env.local
 ```text
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-NEXT_PUBLIC_SITE_URL=https://example.com
+NEXT_PUBLIC_SITE_URL=https://panmoa.com
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
@@ -56,10 +56,10 @@ supabase db push
 アプリは`robots.txt`、`sitemap.xml`、canonical URL、Open Graph/Twitterカード、`DiscussionForumPosting`と`WebSite`のJSON-LDを自動生成します。本番環境では`NEXT_PUBLIC_SITE_URL`に公開サイトのオリジンを設定してください。
 
 ```text
-NEXT_PUBLIC_SITE_URL=https://panmoa.example
+NEXT_PUBLIC_SITE_URL=https://panmoa.com
 ```
 
-カスタムドメインを取得したらVercelプロジェクトの「Settings > Domains」で接続します。Vercelの標準ドメインからカスタムドメインへのリダイレクトを確認した後、Google Search ConsoleとBing Webmaster Toolsで次を実施してください。
+Vercelプロジェクトの「Settings > Domains」で`panmoa.com`を本番ドメインに設定し、`www.panmoa.com`も追加してapexドメインへリダイレクトします。コード側でも`www.panmoa.com`と旧URL`multi-board-eight.vercel.app`から`panmoa.com`へパスとクエリを維持した308リダイレクトを行います。Vercelで両ドメインの証明書発行が完了した後、Google Search ConsoleとBing Webmaster Toolsで次を実施してください。
 
 1. ドメイン所有権をDNSレコードで確認します。
 2. `https://<DOMAIN>/sitemap.xml`を送信します。

@@ -1,8 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { hasSupabaseEnv } from "@/lib/env";
+import { isSiteRedirectHost, SITE_ORIGIN } from "@/lib/seo";
 
 export async function proxy(request: NextRequest) {
+  const forwardedHost = request.headers
+    .get("x-forwarded-host")
+    ?.split(",")[0]
+    ?.trim();
+  const requestHost = forwardedHost || request.headers.get("host");
+  const hostname = requestHost?.split(":")[0] || request.nextUrl.hostname;
+
+  if (isSiteRedirectHost(hostname)) {
+    const redirectUrl = new URL(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+      SITE_ORIGIN,
+    );
+    return NextResponse.redirect(redirectUrl, 308);
+  }
+
   if (!hasSupabaseEnv()) return NextResponse.next();
   const hasSupabaseSession = request.cookies
     .getAll()
