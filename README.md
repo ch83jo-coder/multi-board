@@ -59,7 +59,7 @@ supabase db push
 NEXT_PUBLIC_SITE_URL=https://panmoa.com
 ```
 
-Vercelプロジェクトの「Settings > Domains」で`panmoa.com`を本番ドメインに設定し、`www.panmoa.com`も追加してapexドメインへリダイレクトします。コード側でも`www.panmoa.com`と旧URL`multi-board-eight.vercel.app`から`panmoa.com`へパスとクエリを維持した308リダイレクトを行います。Vercelで両ドメインの証明書発行が完了した後、Google Search ConsoleとBing Webmaster Toolsで次を実施してください。
+Vercelプロジェクトの「Settings > Domains」で`panmoa.com`を本番ドメインに設定し、`www.panmoa.com`も追加してapexドメインへリダイレクトします。コード側でも`www.panmoa.com`、旧URL`multi-board-eight.vercel.app`、mainブランチalias`multi-board-git-main-solo-engine.vercel.app`から`panmoa.com`へパスとクエリを維持した308リダイレクトを行います。Vercel Authenticationが有効なaliasはアプリのリダイレクトより先に認証画面が表示されるため、公開リダイレクトにする場合はVercelの「Settings > Deployment Protection」で対象環境の保護を解除してください。Vercelで両ドメインの証明書発行が完了した後、Google Search ConsoleとBing Webmaster Toolsで次を実施してください。
 
 1. ドメイン所有権をDNSレコードで確認します。
 2. `https://<DOMAIN>/sitemap.xml`を送信します。

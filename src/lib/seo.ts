@@ -5,6 +5,7 @@ export const SITE_ORIGIN = "https://panmoa.com";
 export const SITE_REDIRECT_HOSTS = [
   "www.panmoa.com",
   "multi-board-eight.vercel.app",
+  "multi-board-git-main-solo-engine.vercel.app",
 ] as const;
 
 export function isSiteRedirectHost(hostname: string) {
