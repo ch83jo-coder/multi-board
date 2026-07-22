@@ -8,8 +8,8 @@ export async function MobileBottomNav() {
     <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-center justify-around border-t border-border-subtle bg-white md:hidden">
       {[
         ["home", "ホーム", "/"],
-        ["explore", "ボード", "/boards"],
-        ["edit", "投稿", "/boards?mode=write"],
+        ["database", "実測データ", "/tesla-data"],
+        ["edit", "質問", "/boards?mode=write"],
         ["person", "アカウント", viewer ? "/profile" : "/login"],
       ].map(([icon, label, href]) => (
         <Link

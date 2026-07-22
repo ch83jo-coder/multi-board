@@ -17,7 +17,7 @@ export function RightSidebar({
       <Card className="overflow-hidden">
         <div className="border-b border-border-subtle px-4 py-3">
           <h2 className="font-headline-md text-base font-semibold">
-            人気のコミュニティ
+            Teslaコミュニティ
           </h2>
         </div>
         <div className="divide-y divide-border-subtle">

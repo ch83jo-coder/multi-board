@@ -23,10 +23,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "hourly",
     priority: 1,
   };
+  const teslaData: MetadataRoute.Sitemap[number] = {
+    url: absoluteUrl("/tesla-data"),
+    changeFrequency: "daily",
+    priority: 0.9,
+  };
 
   if (!hasSupabaseEnv()) {
     return [
       home,
+      teslaData,
       ...demoBoards
         .filter((board) => board.is_active)
         .map((board) => ({
@@ -48,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(
       `[sitemap:boards] Supabase query failed (${boardsError.code}): ${boardsError.message}`,
     );
-    return [home];
+    return [home, teslaData];
   }
 
   const activeBoards = (boards ?? []) as SitemapBoard[];
@@ -61,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  if (!activeBoards.length) return [home];
+  if (!activeBoards.length) return [home, teslaData];
 
   const { data: posts, error: postsError } = await supabase
     .from("posts")
@@ -77,7 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(
       `[sitemap:posts] Supabase query failed (${postsError.code}): ${postsError.message}`,
     );
-    return [home, ...boardEntries];
+    return [home, teslaData, ...boardEntries];
   }
 
   const postEntries: MetadataRoute.Sitemap = (posts as SitemapPost[]).flatMap(
@@ -97,5 +103,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   );
 
-  return [home, ...boardEntries, ...postEntries];
+  return [home, teslaData, ...boardEntries, ...postEntries];
 }

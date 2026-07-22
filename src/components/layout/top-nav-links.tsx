@@ -28,6 +28,8 @@ export function TopNavLinks({
   const rootRef = useDismissibleMenu(open, setOpen);
   const inlineBoards = boards.slice(0, 4);
   const overflowBoards = boards.slice(inlineBoards.length);
+  const dataActive =
+    pathname === "/tesla-data" || pathname.startsWith("/tesla-data/");
   const isBoardActive = (slug: string) => {
     const href = `/boards/${slug}`;
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -44,6 +46,13 @@ export function TopNavLinks({
         className={linkClassName(pathname === "/")}
       >
         注目
+      </Link>
+      <Link
+        href="/tesla-data"
+        aria-current={dataActive ? "page" : undefined}
+        className={linkClassName(dataActive)}
+      >
+        実測データ
       </Link>
       {inlineBoards.map((board) => {
         const href = `/boards/${board.slug}`;

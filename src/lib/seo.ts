@@ -1,6 +1,6 @@
 export const SITE_NAME = "Panmoa";
 export const SITE_DESCRIPTION =
-  "活発で快適な交流のためのマルチボードコミュニティ。";
+  "日本のTeslaオーナーが充電、保険、整備、維持費の実体験と実測データを共有する意思決定コミュニティ。";
 export const SITE_ORIGIN = "https://panmoa.com";
 export const SITE_REDIRECT_HOSTS = [
   "www.panmoa.com",

@@ -6,6 +6,7 @@ import { getBoards, getViewer } from "@/lib/data";
 export async function SideNav() {
   const [viewer, boards] = await Promise.all([getViewer(), getBoards()]);
   const links: [string, string, string][] = [
+    ["database", "実測データ", "/tesla-data"],
     ["leaderboard", "ランキング", "/?sort=top"],
     ["trending_up", "人気", "/"],
   ];
@@ -15,10 +16,10 @@ export async function SideNav() {
     <aside className="sticky top-20 hidden h-[calc(100vh-96px)] w-64 shrink-0 xl:flex xl:flex-col">
       <div className="flex h-full flex-col rounded-lg border border-border-subtle bg-surface-alt p-gutter">
         <h2 className="font-headline-md text-headline-md text-primary">
-          コミュニティ案内
+          Teslaコミュニティ
         </h2>
         <p className="mt-1 text-body-sm text-text-muted">
-          Panmoaの注目トピック
+          オーナーの実体験と比較データ
         </p>
         <nav className="mt-6 flex min-h-0 flex-1 flex-col">
           <div className="space-y-1">

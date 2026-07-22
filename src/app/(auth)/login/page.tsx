@@ -15,7 +15,7 @@ export default async function LoginPage({
           おかえりなさい
         </h1>
         <p className="mt-2 text-body-md text-text-muted">
-          Panmoaアカウントでコミュニティに参加しましょう。
+          PanmoaアカウントでTeslaコミュニティに参加しましょう。
         </p>
       </div>
       <AuthForm mode="login" nextPath={next} />

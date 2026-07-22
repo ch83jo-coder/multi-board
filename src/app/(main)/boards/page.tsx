@@ -10,7 +10,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { mode } = await searchParams;
   return {
-    title: mode === "write" ? "投稿先を選択" : "掲示板一覧",
+    title: mode === "write" ? "質問先を選択" : "Tesla掲示板",
     alternates: { canonical: "/boards" },
     ...(mode === "write" ? { robots: { index: false, follow: false } } : {}),
   };
@@ -33,15 +33,15 @@ export default async function BoardsPage({
             name={mode === "write" ? "edit" : "view_list"}
             className="text-[18px]"
           />
-          {mode === "write" ? "新規投稿" : "コミュニティ"}
+          {mode === "write" ? "新規投稿" : "Teslaコミュニティ"}
         </div>
         <h1 className="font-headline-lg text-headline-lg-mobile text-on-surface md:text-headline-lg">
-          {mode === "write" ? "投稿先を選択" : "掲示板一覧"}
+          {mode === "write" ? "質問先を選択" : "Tesla掲示板"}
         </h1>
         <p className="mt-2 text-body-md text-muted-foreground">
           {mode === "write"
-            ? "投稿内容に合う掲示板を選んでください。"
-            : "参加したい掲示板を選んで投稿を確認しましょう。"}
+            ? "オーナーへの質問か購入相談か、内容に合う掲示板を選んでください。"
+            : "オーナーの実体験と購入前の相談をテーマ別に確認できます。"}
         </p>
       </header>
 

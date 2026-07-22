@@ -8,6 +8,15 @@ export type Profile = {
 
 export type HomeSort = "trending" | "latest" | "top";
 export type BoardSort = "latest" | "popular";
+export type TeslaDataType = "charging" | "ownership" | "price";
+export type TeslaModel =
+  | "Model 3"
+  | "Model Y"
+  | "Model S"
+  | "Model X"
+  | "Cybertruck"
+  | "Roadster"
+  | "その他";
 
 export type Board = {
   id: string;
@@ -65,6 +74,59 @@ export type Notification = {
   } | null;
   comment_id: string | null;
   is_read: boolean;
+  created_at: string;
+};
+
+export type ChargingReview = {
+  id: string;
+  author_id: string;
+  author?: Pick<Profile, "username" | "avatar_url">;
+  location_name: string;
+  prefecture: string;
+  charger_type: "supercharger" | "destination" | "public" | "home" | "other";
+  max_power_kw: number;
+  measured_speed_kw: number;
+  wait_minutes: number;
+  congestion: "empty" | "comfortable" | "busy" | "full";
+  rating: number;
+  visited_on: string;
+  notes: string;
+  created_at: string;
+};
+
+export type OwnershipCost = {
+  id: string;
+  author_id: string;
+  author?: Pick<Profile, "username" | "avatar_url">;
+  model: TeslaModel;
+  model_year: number;
+  mileage_km: number;
+  category:
+    | "maintenance"
+    | "repair"
+    | "insurance"
+    | "charging"
+    | "tax"
+    | "accessory"
+    | "other";
+  amount_yen: number;
+  occurred_on: string;
+  details: string;
+  created_at: string;
+};
+
+export type PriceReport = {
+  id: string;
+  author_id: string;
+  author?: Pick<Profile, "username" | "avatar_url">;
+  report_type: "insurance" | "subsidy" | "used_price";
+  model: TeslaModel;
+  model_year: number | null;
+  prefecture: string;
+  amount_yen: number;
+  provider: string;
+  observed_on: string;
+  details: string;
   created_at: string;
 };
 

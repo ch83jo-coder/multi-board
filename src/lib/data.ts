@@ -2,9 +2,12 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import {
   demoBoards,
+  demoChargingReviews,
   demoComments,
   demoNotifications,
+  demoOwnershipCosts,
   demoPosts,
+  demoPriceReports,
 } from "@/lib/demo-data";
 import { hasSupabaseEnv } from "@/lib/env";
 import { getAnonymousClient } from "@/lib/supabase/anon";
@@ -12,10 +15,13 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   Board,
   BoardSort,
+  ChargingReview,
   Comment,
   HomeSort,
   Notification,
+  OwnershipCost,
   Post,
+  PriceReport,
   Profile,
 } from "@/lib/types";
 
@@ -54,6 +60,13 @@ const TRENDING_STOP_WORDS = new Set([
 
 type BoardPostAggregate = Board & { posts?: { count: number }[] };
 type KeywordSource = Pick<Post, "title">;
+
+function getDemoActivePosts() {
+  const activeBoardIds = new Set(
+    demoBoards.filter((board) => board.is_active).map((board) => board.id),
+  );
+  return demoPosts.filter((post) => activeBoardIds.has(post.board_id));
+}
 
 export function parseHomeSort(value?: string): HomeSort {
   return value === "latest" || value === "top" ? value : "trending";
@@ -197,7 +210,8 @@ const getCachedTrendingKeywords = unstable_cache(
     ).toISOString();
     const { data, error } = await supabase
       .from("posts")
-      .select("title")
+      .select("title, board:boards!inner(is_active)")
+      .eq("board.is_active", true)
       .gte("created_at", sevenDaysAgo)
       .order("created_at", { ascending: false })
       .limit(TRENDING_POST_LIMIT);
@@ -207,7 +221,7 @@ const getCachedTrendingKeywords = unstable_cache(
     }
     return rankTrendingKeywords(data as KeywordSource[]);
   },
-  ["trending-keywords-v3"],
+  ["trending-keywords-v4"],
   { revalidate: 300, tags: ["home-sidebar"] },
 );
 
@@ -259,7 +273,9 @@ export async function getTrendingKeywords(): Promise<string[]> {
   if (!hasSupabaseEnv()) {
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return rankTrendingKeywords(
-      demoPosts.filter((post) => Date.parse(post.created_at) >= sevenDaysAgo),
+      getDemoActivePosts().filter(
+        (post) => Date.parse(post.created_at) >= sevenDaysAgo,
+      ),
     );
   }
   try {
@@ -269,12 +285,68 @@ export async function getTrendingKeywords(): Promise<string[]> {
   }
 }
 
+export async function getChargingReviews(
+  limit = 100,
+): Promise<ChargingReview[]> {
+  if (!hasSupabaseEnv()) return demoChargingReviews.slice(0, limit);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("charging_reviews")
+    .select(
+      "*, author:profiles!charging_reviews_author_id_fkey(username,avatar_url)",
+    )
+    .order("visited_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    logQueryError("getChargingReviews", error);
+    return [];
+  }
+  return data as unknown as ChargingReview[];
+}
+
+export async function getOwnershipCosts(limit = 100): Promise<OwnershipCost[]> {
+  if (!hasSupabaseEnv()) return demoOwnershipCosts.slice(0, limit);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ownership_costs")
+    .select(
+      "*, author:profiles!ownership_costs_author_id_fkey(username,avatar_url)",
+    )
+    .order("occurred_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    logQueryError("getOwnershipCosts", error);
+    return [];
+  }
+  return data as unknown as OwnershipCost[];
+}
+
+export async function getPriceReports(limit = 100): Promise<PriceReport[]> {
+  if (!hasSupabaseEnv()) return demoPriceReports.slice(0, limit);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("price_reports")
+    .select(
+      "*, author:profiles!price_reports_author_id_fkey(username,avatar_url)",
+    )
+    .order("observed_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    logQueryError("getPriceReports", error);
+    return [];
+  }
+  return data as unknown as PriceReport[];
+}
+
 export async function getHomePosts(
   sort: HomeSort = "trending",
   page = 1,
 ): Promise<Post[]> {
   if (!hasSupabaseEnv()) {
-    const posts = [...demoPosts];
+    const posts = getDemoActivePosts();
     const sorted =
       sort === "latest"
         ? posts.sort(
@@ -296,8 +368,9 @@ export async function getHomePosts(
   let query = supabase
     .from("posts")
     .select(
-      "*, board:boards(slug,name,icon), author:profiles!posts_author_id_fkey(username,avatar_url)",
-    );
+      "*, board:boards!inner(slug,name,icon,is_active), author:profiles!posts_author_id_fkey(username,avatar_url)",
+    )
+    .eq("board.is_active", true);
   if (sort === "latest") {
     query = query.order("created_at", { ascending: false });
   } else {
@@ -322,16 +395,20 @@ export async function getHomePostCount(
   sort: HomeSort = "trending",
 ): Promise<number> {
   if (!hasSupabaseEnv()) {
-    if (sort !== "trending") return demoPosts.length;
+    const posts = getDemoActivePosts();
+    if (sort !== "trending") return posts.length;
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return demoPosts.filter(
-      (post) => Date.parse(post.created_at) >= sevenDaysAgo,
-    ).length;
+    return posts.filter((post) => Date.parse(post.created_at) >= sevenDaysAgo)
+      .length;
   }
   const supabase = await createClient();
   let query = supabase
     .from("posts")
-    .select("*", { count: "exact", head: true });
+    .select("id, board:boards!inner(id,is_active)", {
+      count: "exact",
+      head: true,
+    })
+    .eq("board.is_active", true);
   if (sort === "trending") {
     query = query.gte(
       "created_at",
@@ -561,7 +638,7 @@ export async function searchPosts(query: string): Promise<Post[]> {
   if (!term) return [];
   if (!hasSupabaseEnv()) {
     const normalized = term.toLocaleLowerCase("ja-JP");
-    return demoPosts.filter((post) =>
+    return getDemoActivePosts().filter((post) =>
       post.title.toLocaleLowerCase("ja-JP").includes(normalized),
     );
   }
@@ -570,8 +647,9 @@ export async function searchPosts(query: string): Promise<Post[]> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "*, board:boards(slug,name,icon), author:profiles!posts_author_id_fkey(username,avatar_url)",
+      "*, board:boards!inner(slug,name,icon,is_active), author:profiles!posts_author_id_fkey(username,avatar_url)",
     )
+    .eq("board.is_active", true)
     .ilike("title", `%${pattern}%`)
     .order("created_at", { ascending: false })
     .limit(50);

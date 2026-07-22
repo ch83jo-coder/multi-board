@@ -1,69 +1,108 @@
 import Link from "next/link";
+import { buttonStyles } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
-import type { Board, Post } from "@/lib/types";
+import type { Board } from "@/lib/types";
 
-export function Hero({ post, boards }: { post?: Post; boards: Board[] }) {
-  const firstBoard = boards[0];
-  const featuredBoard =
-    boards.find((board) => board.slug === "humor") ?? firstBoard;
-  const secondaryBoard =
-    boards.find((board) => board.slug === "game") ?? boards[1] ?? firstBoard;
-  const href = post?.board
-    ? `/boards/${post.board.slug}/${post.id}`
-    : firstBoard
-      ? `/boards/${firstBoard.slug}`
-      : "/";
+const benefits = [
+  {
+    icon: "speed",
+    title: "実測データを比較",
+    description: "充電速度や待ち時間を、地域と条件ごとに確認できます。",
+  },
+  {
+    icon: "payments",
+    title: "所有コストを共有",
+    description: "保険、整備、故障、補助金の実例をモデル別に蓄積します。",
+  },
+  {
+    icon: "forum",
+    title: "オーナーに質問",
+    description: "購入前の疑問を、実際の利用条件に近い人へ相談できます。",
+  },
+];
+
+export function Hero({
+  boards,
+  isAuthenticated,
+}: {
+  boards: Board[];
+  isAuthenticated: boolean;
+}) {
+  const teslaBoard =
+    boards.find((board) => board.slug === "tesla") ?? boards[0];
+  const boardHref = teslaBoard ? `/boards/${teslaBoard.slug}` : "/boards";
+  const questionHref = teslaBoard
+    ? `/boards/${teslaBoard.slug}/write`
+    : "/boards?mode=write";
+
   return (
-    <section className="grid grid-cols-1 gap-4 md:grid-cols-12">
-      <Link
-        href={href}
-        className="group relative h-64 overflow-hidden rounded-lg border border-border-subtle bg-inverse-surface md:col-span-8"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_15%,#0055ff_0,transparent_45%),linear-gradient(135deg,#10203f,#111827)]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 z-10 p-6">
-          <span className="mb-2 inline-block rounded-sm bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-            速報
-          </span>
-          <h1 className="font-headline-lg text-headline-lg-mobile leading-tight text-white md:text-headline-lg">
-            {post?.title ?? "Panmoa 2.0：新しい議論の時代へ"}
+    <section className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
+        <div className="p-6 sm:p-8 lg:p-10">
+          <p className="flex items-center gap-2 font-label-md text-label-md text-primary">
+            <MaterialIcon name="electric_car" className="text-[20px]" />
+            日本のTeslaオーナーと購入検討者へ
+          </p>
+          <h1 className="mt-4 max-w-3xl font-headline-lg text-[30px] leading-tight text-on-surface sm:text-[38px] sm:leading-[1.2]">
+            充電・保険・維持費の
+            <span className="text-primary">リアルを共有する場所</span>
           </h1>
-          <p className="mt-2 line-clamp-1 text-body-sm text-white/75">
-            情報をすばやく、分かりやすく交換できる新しいコミュニティです。
+          <p className="mt-4 max-w-2xl text-body-lg leading-7 text-on-surface-variant">
+            カタログだけでは分からない実測値と所有体験を比較して、購入前も納車後も迷いを減らせるTesla専門コミュニティです。
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link
+              href={isAuthenticated ? "/tesla-data/new" : "/signup"}
+              className={buttonStyles({ size: "lg" })}
+            >
+              <MaterialIcon
+                name={isAuthenticated ? "add_chart" : "person_add"}
+                className="text-[19px]"
+              />
+              {isAuthenticated ? "実測データを共有" : "無料で会員登録"}
+            </Link>
+            <Link
+              href={isAuthenticated ? boardHref : questionHref}
+              className={buttonStyles({ variant: "outline", size: "lg" })}
+            >
+              <MaterialIcon name="chat" className="text-[19px]" />
+              {isAuthenticated ? "Tesla掲示板へ" : "ゲストで質問する"}
+            </Link>
+          </div>
+          <p className="mt-3 text-label-sm text-text-muted">
+            閲覧は登録不要。会員登録するとデータ共有、回答・投票、返信通知を利用できます。
           </p>
         </div>
-      </Link>
-      <div className="flex flex-col gap-4 md:col-span-4">
-        <Link
-          href={featuredBoard ? `/boards/${featuredBoard.slug}` : "/"}
-          className="group relative flex-1 overflow-hidden rounded-lg bg-primary-container p-5 text-on-primary-container"
-        >
-          <h2 className="font-headline-md text-headline-md">
-            今週の{featuredBoard?.name ?? "掲示板"}
-          </h2>
-          <p className="mt-2 text-body-sm opacity-90">
-            今週話題になった投稿をまとめてチェックしましょう。
-          </p>
-          <MaterialIcon
-            name="sentiment_very_satisfied"
-            className="absolute -bottom-2 -right-2 text-6xl opacity-20 transition-transform group-hover:rotate-6"
-          />
-        </Link>
-        <Link
-          href={secondaryBoard ? `/boards/${secondaryBoard.slug}` : "/"}
-          className="flex-1 rounded-lg border border-border-subtle bg-surface-container p-5"
-        >
-          <h2 className="font-headline-md text-headline-md text-primary">
-            {secondaryBoard?.name ?? "掲示板"}
-          </h2>
-          <p className="mt-2 text-body-sm text-on-surface-variant">
-            最新の投稿と議論をチェックしましょう。
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1 font-label-md text-primary">
-            掲示板へ
-            <MaterialIcon name="arrow_forward" className="text-[16px]" />
-          </span>
-        </Link>
+        <div className="relative flex min-h-64 items-center overflow-hidden bg-inverse-surface p-6 text-inverse-on-surface sm:p-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(37,99,235,0.85),transparent_45%),radial-gradient(circle_at_15%_85%,rgba(21,128,61,0.45),transparent_42%)]" />
+          <div className="relative space-y-5">
+            <p className="font-label-sm text-inverse-primary">
+              PANMOA OWNER DATA
+            </p>
+            <p className="font-headline-md text-2xl leading-8">
+              人が共有した事実を、比べられる知識へ。
+            </p>
+            <div className="grid gap-3">
+              {benefits.map((benefit) => (
+                <div
+                  key={benefit.title}
+                  className="flex gap-3 rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur-sm"
+                >
+                  <MaterialIcon
+                    name={benefit.icon}
+                    className="mt-0.5 text-[20px] text-inverse-primary"
+                  />
+                  <div>
+                    <p className="font-label-md text-white">{benefit.title}</p>
+                    <p className="mt-0.5 text-label-sm leading-5 text-white/65">
+                      {benefit.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

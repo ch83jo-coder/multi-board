@@ -12,6 +12,7 @@ import {
   getHomePosts,
   getPopularBoards,
   getTrendingKeywords,
+  getViewer,
   POSTS_PER_PAGE,
   parseHomeSort,
 } from "@/lib/data";
@@ -38,23 +39,29 @@ export default async function HomePage({
   const requestedPage = Number.isFinite(parsedPage)
     ? Math.max(1, Math.floor(parsedPage))
     : 1;
-  const [total, boards, popularBoards, trendingKeywords, requestedPosts] =
-    await Promise.all([
-      getHomePostCount(sort),
-      getBoards(),
-      getPopularBoards(),
-      getTrendingKeywords(),
-      getHomePosts(sort, requestedPage),
-    ]);
+  const [
+    total,
+    boards,
+    popularBoards,
+    trendingKeywords,
+    requestedPosts,
+    viewer,
+  ] = await Promise.all([
+    getHomePostCount(sort),
+    getBoards(),
+    getPopularBoards(),
+    getTrendingKeywords(),
+    getHomePosts(sort, requestedPage),
+    getViewer(),
+  ]);
   const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
   const page = Math.min(requestedPage, pages);
   const posts =
     page === requestedPage ? requestedPosts : await getHomePosts(sort, page);
-  const heroPost = posts.find((post) => post.id === "launch") ?? posts[0];
   return (
     <div className="flex gap-gutter">
       <div className="min-w-0 flex-1 space-y-6">
-        <Hero post={heroPost} boards={boards} />
+        <Hero boards={boards} isAuthenticated={Boolean(viewer)} />
         <section
           className="space-y-3 md:hidden"
           aria-labelledby="mobile-boards"
@@ -64,7 +71,7 @@ export default async function HomePage({
               id="mobile-boards"
               className="font-headline-md text-headline-md"
             >
-              掲示板
+              Tesla掲示板
             </h2>
             <Link
               href="/boards"

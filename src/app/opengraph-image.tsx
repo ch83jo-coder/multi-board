@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Panmoa community";
+export const alt = "Panmoa Tesla owner decision community";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -11,7 +11,7 @@ export default function OpenGraphImage() {
       style={{
         alignItems: "center",
         background:
-          "linear-gradient(135deg, #111827 0%, #312e81 55%, #7c3aed 100%)",
+          "linear-gradient(135deg, #0f172a 0%, #1e3a8a 58%, #166534 100%)",
         color: "white",
         display: "flex",
         flexDirection: "column",
@@ -35,7 +35,7 @@ export default function OpenGraphImage() {
       >
         <div
           style={{
-            color: "#c4b5fd",
+            color: "#bfdbfe",
             display: "flex",
             fontSize: 28,
             fontWeight: 700,
@@ -43,7 +43,7 @@ export default function OpenGraphImage() {
             textTransform: "uppercase",
           }}
         >
-          Multi-board community
+          Tesla owner decision community
         </div>
         <div
           style={{
@@ -59,13 +59,13 @@ export default function OpenGraphImage() {
         </div>
         <div
           style={{
-            color: "#e9d5ff",
+            color: "#dbeafe",
             display: "flex",
             fontSize: 34,
             marginTop: 24,
           }}
         >
-          Discover. Discuss. Connect.
+          Real charging, cost and ownership data.
         </div>
       </div>
     </div>,
