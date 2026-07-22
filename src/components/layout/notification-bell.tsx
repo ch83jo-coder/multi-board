@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { markNotificationsRead } from "@/app/actions/notifications";
 import { useDismissibleMenu } from "@/components/layout/use-dismissible-menu";
@@ -17,8 +18,12 @@ export function NotificationBell({
   notifications: Notification[];
   unreadCount: number;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [optimisticallyRead, setOptimisticallyRead] = useState(false);
+  const [unreadIdsSnapshot, setUnreadIdsSnapshot] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
   const rootRef = useDismissibleMenu(open, setOpen);
@@ -28,11 +33,28 @@ export function NotificationBell({
     if (unreadCount === 0) setOptimisticallyRead(false);
   }, [unreadCount]);
 
+  useEffect(() => {
+    if (!open && unreadIdsSnapshot.size > 0) {
+      setUnreadIdsSnapshot(new Set());
+    }
+  }, [open, unreadIdsSnapshot]);
+
   const toggle = () => {
     const nextOpen = !open;
     setOpen(nextOpen);
     setError("");
-    if (!nextOpen || visibleUnreadCount === 0) return;
+    if (!nextOpen) return;
+
+    setUnreadIdsSnapshot(
+      visibleUnreadCount > 0
+        ? new Set(
+            notifications
+              .filter((notification) => !notification.is_read)
+              .map((notification) => notification.id),
+          )
+        : new Set(),
+    );
+    if (visibleUnreadCount === 0) return;
 
     setOptimisticallyRead(true);
     startTransition(async () => {
@@ -40,7 +62,9 @@ export function NotificationBell({
       if (result.error) {
         setOptimisticallyRead(false);
         setError(result.error);
+        return;
       }
+      router.refresh();
     });
   };
 
@@ -98,7 +122,7 @@ export function NotificationBell({
                     role="menuitem"
                     href={`/boards/${slug}/${notification.post_id}`}
                     onClick={() => setOpen(false)}
-                    className={`flex gap-3 border-b border-border-subtle px-4 py-3 transition-colors last:border-0 hover:bg-surface-alt ${notification.is_read || optimisticallyRead ? "bg-white" : "bg-primary-fixed/40"}`}
+                    className={`flex gap-3 border-b border-border-subtle px-4 py-3 transition-colors last:border-0 hover:bg-surface-alt ${unreadIdsSnapshot.has(notification.id) ? "bg-primary-fixed/40" : "bg-white"}`}
                   >
                     <Avatar
                       username={actor}
