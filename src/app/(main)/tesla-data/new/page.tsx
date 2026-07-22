@@ -7,6 +7,7 @@ import { buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { getViewer } from "@/lib/data";
+import { hasOpenAiKey } from "@/lib/env.server";
 import {
   parseTeslaDataType,
   TESLA_DATA_TABS,
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
   title: "Tesla実体験データを登録",
   robots: { index: false, follow: false },
 };
+
+export const maxDuration = 60;
 
 export default async function NewTeslaDataPage({
   searchParams,
@@ -59,7 +62,12 @@ export default async function NewTeslaDataPage({
       </div>
 
       <Card className="p-5 md:p-7">
-        <DataReportForm type={type} today={todayInJapan()} />
+        <DataReportForm
+          key={type}
+          type={type}
+          today={todayInJapan()}
+          aiEnabled={hasOpenAiKey()}
+        />
       </Card>
 
       <div className="text-center">

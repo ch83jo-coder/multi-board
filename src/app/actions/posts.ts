@@ -3,6 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { hasSupabaseEnv } from "@/lib/env";
+import { validateImageFile } from "@/lib/image-upload.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
@@ -101,10 +102,8 @@ export async function savePost(
   const { user, role } = actor;
   let thumbnailUrl: string | undefined;
   if (image instanceof File && image.size > 0) {
-    if (image.size > 5 * 1024 * 1024)
-      return { error: "画像は5MB以下のファイルをアップロードしてください。" };
-    if (!["image/jpeg", "image/png", "image/webp"].includes(image.type))
-      return { error: "JPG、PNG、WebP形式の画像のみアップロードできます。" };
+    const imageError = validateImageFile(image);
+    if (imageError) return { error: imageError };
     const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
     const imagePath = `${user.id}/${crypto.randomUUID()}.${extension}`;
     const { error: uploadError } = await supabase.storage

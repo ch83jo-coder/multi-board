@@ -1,7 +1,17 @@
 "use client";
 
-import { useActionState } from "react";
-import { saveTeslaDataReport } from "@/app/actions/tesla-data";
+import {
+  createContext,
+  useActionState,
+  useContext,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import {
+  extractTeslaDataFromImage,
+  saveTeslaDataReport,
+} from "@/app/actions/tesla-data";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { MaterialIcon } from "@/components/ui/material-icon";
@@ -15,21 +25,58 @@ import {
 } from "@/lib/tesla-data";
 import type { TeslaDataType } from "@/lib/types";
 
+type FormDefaults = Record<string, string>;
+
+const AiFieldContext = createContext<ReadonlySet<string>>(new Set());
+
+function initialDefaults(type: TeslaDataType, today: string): FormDefaults {
+  if (type === "charging")
+    return {
+      chargerType: "supercharger",
+      waitMinutes: "0",
+      congestion: "empty",
+      rating: "4",
+      visitedOn: today,
+    };
+  if (type === "ownership")
+    return {
+      model: "Model 3",
+      category: "maintenance",
+      occurredOn: today,
+    };
+  return {
+    reportType: "insurance",
+    model: "Model 3",
+    observedOn: today,
+  };
+}
+
 function Field({
   label,
   htmlFor,
+  fieldName,
   hint,
   children,
 }: {
   label: string;
   htmlFor: string;
+  fieldName: string;
   hint?: string;
   children: React.ReactNode;
 }) {
+  const aiFilled = useContext(AiFieldContext).has(fieldName);
   return (
-    <label className="block" htmlFor={htmlFor}>
-      <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
-        {label}
+    <label
+      className={`block rounded-lg transition-colors ${aiFilled ? "-m-2 border border-primary/15 bg-primary/5 p-2" : ""}`}
+      htmlFor={htmlFor}
+    >
+      <span className="mb-1.5 flex items-center justify-between gap-2 font-label-md text-label-md text-text-muted">
+        <span>{label}</span>
+        {aiFilled && (
+          <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-on-primary">
+            AI入力・要確認
+          </span>
+        )}
       </span>
       {children}
       {hint && (
@@ -67,40 +114,72 @@ function PrefectureOptions() {
   ));
 }
 
-function ChargingFields({ today }: { today: string }) {
+function ChargingFields({
+  today,
+  defaults,
+}: {
+  today: string;
+  defaults: FormDefaults;
+}) {
   return (
     <>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="充電スポット名" htmlFor="location-name">
+        <Field
+          label="充電スポット名"
+          htmlFor="location-name"
+          fieldName="locationName"
+        >
           <Input
             id="location-name"
             name="locationName"
+            defaultValue={defaults.locationName ?? ""}
             minLength={2}
             maxLength={120}
             required
             placeholder="例: 東京ベイ スーパーチャージャー"
           />
         </Field>
-        <Field label="都道府県" htmlFor="charging-prefecture">
-          <Select id="charging-prefecture" name="prefecture" required>
+        <Field
+          label="都道府県"
+          htmlFor="charging-prefecture"
+          fieldName="prefecture"
+        >
+          <Select
+            id="charging-prefecture"
+            name="prefecture"
+            defaultValue={defaults.prefecture ?? ""}
+            required
+          >
             <option value="">選択してください</option>
             <PrefectureOptions />
           </Select>
         </Field>
-        <Field label="充電器タイプ" htmlFor="charger-type">
-          <Select id="charger-type" name="chargerType" required>
+        <Field
+          label="充電器タイプ"
+          htmlFor="charger-type"
+          fieldName="chargerType"
+        >
+          <Select
+            id="charger-type"
+            name="chargerType"
+            defaultValue={defaults.chargerType ?? ""}
+            required
+          >
+            <option value="">選択してください</option>
             <OptionList options={CHARGER_TYPES} />
           </Select>
         </Field>
         <Field
           label="充電器の最大出力"
           htmlFor="max-power"
+          fieldName="maxPowerKw"
           hint="充電器に表示されている定格出力"
         >
           <div className="relative">
             <Input
               id="max-power"
               name="maxPowerKw"
+              defaultValue={defaults.maxPowerKw ?? ""}
               type="number"
               min="0.1"
               max="1000"
@@ -116,12 +195,14 @@ function ChargingFields({ today }: { today: string }) {
         <Field
           label="実測した最大速度"
           htmlFor="measured-speed"
+          fieldName="measuredSpeedKw"
           hint="車両画面またはアプリで確認した最大値"
         >
           <div className="relative">
             <Input
               id="measured-speed"
               name="measuredSpeedKw"
+              defaultValue={defaults.measuredSpeedKw ?? ""}
               type="number"
               min="0.1"
               max="1000"
@@ -134,16 +215,16 @@ function ChargingFields({ today }: { today: string }) {
             </span>
           </div>
         </Field>
-        <Field label="待ち時間" htmlFor="wait-minutes">
+        <Field label="待ち時間" htmlFor="wait-minutes" fieldName="waitMinutes">
           <div className="relative">
             <Input
               id="wait-minutes"
               name="waitMinutes"
+              defaultValue={defaults.waitMinutes ?? ""}
               type="number"
               min="0"
               max="1440"
               step="1"
-              defaultValue="0"
               required
               className="pr-12"
             />
@@ -152,13 +233,25 @@ function ChargingFields({ today }: { today: string }) {
             </span>
           </div>
         </Field>
-        <Field label="混雑状況" htmlFor="congestion">
-          <Select id="congestion" name="congestion" required>
+        <Field label="混雑状況" htmlFor="congestion" fieldName="congestion">
+          <Select
+            id="congestion"
+            name="congestion"
+            defaultValue={defaults.congestion ?? ""}
+            required
+          >
+            <option value="">選択してください</option>
             <OptionList options={CONGESTION_LEVELS} />
           </Select>
         </Field>
-        <Field label="総合評価" htmlFor="rating">
-          <Select id="rating" name="rating" required defaultValue="4">
+        <Field label="総合評価" htmlFor="rating" fieldName="rating">
+          <Select
+            id="rating"
+            name="rating"
+            required
+            defaultValue={defaults.rating ?? ""}
+          >
+            <option value="">選択してください</option>
             {[5, 4, 3, 2, 1].map((rating) => (
               <option key={rating} value={rating}>
                 {"★".repeat(rating)}（{rating}）
@@ -166,13 +259,13 @@ function ChargingFields({ today }: { today: string }) {
             ))}
           </Select>
         </Field>
-        <Field label="利用日" htmlFor="visited-on">
+        <Field label="利用日" htmlFor="visited-on" fieldName="visitedOn">
           <Input
             id="visited-on"
             name="visitedOn"
             type="date"
             max={today}
-            defaultValue={today}
+            defaultValue={defaults.visitedOn ?? ""}
             required
           />
         </Field>
@@ -180,11 +273,13 @@ function ChargingFields({ today }: { today: string }) {
       <Field
         label="利用条件・補足（任意）"
         htmlFor="charging-notes"
+        fieldName="notes"
         hint="訪問時刻、到着時SOC、気温などを含めると比較しやすくなります。"
       >
         <Textarea
           id="charging-notes"
           name="notes"
+          defaultValue={defaults.notes ?? ""}
           maxLength={1000}
           className="min-h-28"
           placeholder="例: 平日19時台、到着時SOC 18%、4基中3基を利用中"
@@ -194,20 +289,37 @@ function ChargingFields({ today }: { today: string }) {
   );
 }
 
-function OwnershipFields({ today }: { today: string }) {
+function OwnershipFields({
+  today,
+  defaults,
+}: {
+  today: string;
+  defaults: FormDefaults;
+}) {
   const currentYear = today.slice(0, 4);
   return (
     <>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="モデル" htmlFor="ownership-model">
-          <Select id="ownership-model" name="model" required>
+        <Field label="モデル" htmlFor="ownership-model" fieldName="model">
+          <Select
+            id="ownership-model"
+            name="model"
+            defaultValue={defaults.model ?? ""}
+            required
+          >
+            <option value="">選択してください</option>
             <ModelOptions />
           </Select>
         </Field>
-        <Field label="年式" htmlFor="ownership-model-year">
+        <Field
+          label="年式"
+          htmlFor="ownership-model-year"
+          fieldName="modelYear"
+        >
           <Input
             id="ownership-model-year"
             name="modelYear"
+            defaultValue={defaults.modelYear ?? ""}
             type="number"
             min="2008"
             max={currentYear}
@@ -216,11 +328,16 @@ function OwnershipFields({ today }: { today: string }) {
             required
           />
         </Field>
-        <Field label="発生時の走行距離" htmlFor="mileage-km">
+        <Field
+          label="発生時の走行距離"
+          htmlFor="mileage-km"
+          fieldName="mileageKm"
+        >
           <div className="relative">
             <Input
               id="mileage-km"
               name="mileageKm"
+              defaultValue={defaults.mileageKm ?? ""}
               type="number"
               min="0"
               max="3000000"
@@ -233,16 +350,27 @@ function OwnershipFields({ today }: { today: string }) {
             </span>
           </div>
         </Field>
-        <Field label="費用区分" htmlFor="ownership-category">
-          <Select id="ownership-category" name="category" required>
+        <Field
+          label="費用区分"
+          htmlFor="ownership-category"
+          fieldName="category"
+        >
+          <Select
+            id="ownership-category"
+            name="category"
+            defaultValue={defaults.category ?? ""}
+            required
+          >
+            <option value="">選択してください</option>
             <OptionList options={OWNERSHIP_CATEGORIES} />
           </Select>
         </Field>
-        <Field label="支払額" htmlFor="ownership-amount">
+        <Field label="支払額" htmlFor="ownership-amount" fieldName="amountYen">
           <div className="relative">
             <Input
               id="ownership-amount"
               name="amountYen"
+              defaultValue={defaults.amountYen ?? ""}
               type="number"
               min="0"
               max="100000000"
@@ -255,21 +383,26 @@ function OwnershipFields({ today }: { today: string }) {
             </span>
           </div>
         </Field>
-        <Field label="発生日・支払日" htmlFor="occurred-on">
+        <Field
+          label="発生日・支払日"
+          htmlFor="occurred-on"
+          fieldName="occurredOn"
+        >
           <Input
             id="occurred-on"
             name="occurredOn"
             type="date"
             max={today}
-            defaultValue={today}
+            defaultValue={defaults.occurredOn ?? ""}
             required
           />
         </Field>
       </div>
-      <Field label="内容" htmlFor="ownership-details">
+      <Field label="内容" htmlFor="ownership-details" fieldName="details">
         <Textarea
           id="ownership-details"
           name="details"
+          defaultValue={defaults.details ?? ""}
           minLength={2}
           maxLength={1000}
           required
@@ -281,29 +414,49 @@ function OwnershipFields({ today }: { today: string }) {
   );
 }
 
-function PriceFields({ today }: { today: string }) {
+function PriceFields({
+  today,
+  defaults,
+}: {
+  today: string;
+  defaults: FormDefaults;
+}) {
   const currentYear = today.slice(0, 4);
   return (
     <>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="データ種別" htmlFor="report-type">
-          <Select id="report-type" name="reportType" required>
+        <Field label="データ種別" htmlFor="report-type" fieldName="reportType">
+          <Select
+            id="report-type"
+            name="reportType"
+            defaultValue={defaults.reportType ?? ""}
+            required
+          >
+            <option value="">選択してください</option>
             <OptionList options={PRICE_REPORT_TYPES} />
           </Select>
         </Field>
-        <Field label="モデル" htmlFor="price-model">
-          <Select id="price-model" name="model" required>
+        <Field label="モデル" htmlFor="price-model" fieldName="model">
+          <Select
+            id="price-model"
+            name="model"
+            defaultValue={defaults.model ?? ""}
+            required
+          >
+            <option value="">選択してください</option>
             <ModelOptions />
           </Select>
         </Field>
         <Field
           label="年式（任意）"
           htmlFor="price-model-year"
+          fieldName="modelYear"
           hint="中古価格の場合は入力を推奨します。"
         >
           <Input
             id="price-model-year"
             name="modelYear"
+            defaultValue={defaults.modelYear ?? ""}
             type="number"
             min="2008"
             max={currentYear}
@@ -311,17 +464,27 @@ function PriceFields({ today }: { today: string }) {
             placeholder="例: 2023"
           />
         </Field>
-        <Field label="都道府県" htmlFor="price-prefecture">
-          <Select id="price-prefecture" name="prefecture" required>
+        <Field
+          label="都道府県"
+          htmlFor="price-prefecture"
+          fieldName="prefecture"
+        >
+          <Select
+            id="price-prefecture"
+            name="prefecture"
+            defaultValue={defaults.prefecture ?? ""}
+            required
+          >
             <option value="">選択してください</option>
             <PrefectureOptions />
           </Select>
         </Field>
-        <Field label="金額" htmlFor="price-amount">
+        <Field label="金額" htmlFor="price-amount" fieldName="amountYen">
           <div className="relative">
             <Input
               id="price-amount"
               name="amountYen"
+              defaultValue={defaults.amountYen ?? ""}
               type="number"
               min="0"
               max="100000000"
@@ -334,23 +497,28 @@ function PriceFields({ today }: { today: string }) {
             </span>
           </div>
         </Field>
-        <Field label="保険会社・制度・販売店" htmlFor="provider">
+        <Field
+          label="保険会社・制度・販売店"
+          htmlFor="provider"
+          fieldName="provider"
+        >
           <Input
             id="provider"
             name="provider"
+            defaultValue={defaults.provider ?? ""}
             minLength={2}
             maxLength={120}
             required
             placeholder="公開できる範囲で入力"
           />
         </Field>
-        <Field label="確認日" htmlFor="observed-on">
+        <Field label="確認日" htmlFor="observed-on" fieldName="observedOn">
           <Input
             id="observed-on"
             name="observedOn"
             type="date"
             max={today}
-            defaultValue={today}
+            defaultValue={defaults.observedOn ?? ""}
             required
           />
         </Field>
@@ -358,11 +526,13 @@ function PriceFields({ today }: { today: string }) {
       <Field
         label="条件・補足（任意）"
         htmlFor="price-details"
+        fieldName="details"
         hint="保険の等級、補助金の対象条件、中古車の走行距離など"
       >
         <Textarea
           id="price-details"
           name="details"
+          defaultValue={defaults.details ?? ""}
           maxLength={1000}
           className="min-h-28"
         />
@@ -371,24 +541,167 @@ function PriceFields({ today }: { today: string }) {
   );
 }
 
+function AiImageAssist({
+  type,
+  onExtract,
+}: {
+  type: TeslaDataType;
+  onExtract: (fields: FormDefaults) => void;
+}) {
+  const imageRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState<{
+    kind: "error" | "success";
+    text: string;
+  } | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function extract() {
+    const image = imageRef.current?.files?.[0];
+    if (!image) {
+      setMessage({ kind: "error", text: "画像を選択してください。" });
+      return;
+    }
+    if (image.size > 5 * 1024 * 1024) {
+      setMessage({
+        kind: "error",
+        text: "画像は5MB以下のファイルをアップロードしてください。",
+      });
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(image.type)) {
+      setMessage({
+        kind: "error",
+        text: "JPG、PNG、WebP形式の画像のみアップロードできます。",
+      });
+      return;
+    }
+    setMessage(null);
+    const formData = new FormData();
+    formData.set("image", image);
+    startTransition(async () => {
+      try {
+        const result = await extractTeslaDataFromImage(type, formData);
+        if (result.error) {
+          setMessage({ kind: "error", text: result.error });
+          return;
+        }
+        if (result.fields && Object.keys(result.fields).length > 0)
+          onExtract(result.fields);
+        setMessage({
+          kind: "success",
+          text: result.success ?? "画像の読み取りが完了しました。",
+        });
+      } catch {
+        setMessage({
+          kind: "error",
+          text: "画像を読み取れませんでした。もう一度お試しください。",
+        });
+      }
+    });
+  }
+
+  return (
+    <section
+      aria-labelledby="ai-image-title"
+      className="space-y-3 rounded-lg border border-primary/15 bg-accent/60 p-4"
+    >
+      <div className="flex gap-3">
+        <MaterialIcon
+          name="document_scanner"
+          className="mt-0.5 shrink-0 text-[22px] text-primary"
+        />
+        <div>
+          <h2 id="ai-image-title" className="font-label-lg text-on-surface">
+            写真から自動入力
+          </h2>
+          <p className="mt-1 text-body-sm text-text-muted">
+            Teslaアプリの画面、領収書、見積書などを選択してください。
+          </p>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+        <label className="block" htmlFor={`ai-image-${type}`}>
+          <span className="mb-1.5 block font-label-md text-label-md text-text-muted">
+            読み取る画像
+          </span>
+          <input
+            ref={imageRef}
+            id={`ai-image-${type}`}
+            type="file"
+            accept="image/*"
+            aria-describedby="ai-image-privacy"
+            className="block w-full rounded-md border border-input bg-white text-body-sm text-on-surface shadow-sm file:mr-3 file:h-10 file:border-0 file:border-r file:border-border-subtle file:bg-muted file:px-3 file:font-semibold file:text-on-surface hover:file:bg-surface-container-high"
+          />
+        </label>
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          disabled={pending}
+          onClick={extract}
+        >
+          <MaterialIcon name="auto_awesome" className="text-[19px]" />
+          {pending ? "読み取り中..." : "AIで読み取る"}
+        </Button>
+      </div>
+      <p id="ai-image-privacy" className="text-label-sm text-text-muted">
+        JPG・PNG・WebP、5MB以下。画像は入力補助のためAIに送信され、このサイトには保存されません。読み取り結果は必ず確認してください。
+      </p>
+      {message && (
+        <p
+          role={message.kind === "error" ? "alert" : "status"}
+          className={`rounded-md px-3 py-2 text-body-sm ${
+            message.kind === "error"
+              ? "bg-error-container text-on-error-container"
+              : "bg-secondary-container text-on-secondary-container"
+          }`}
+        >
+          {message.text}
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function DataReportForm({
   type,
   today,
+  aiEnabled,
 }: {
   type: TeslaDataType;
   today: string;
+  aiEnabled: boolean;
 }) {
   const [state, action, pending] = useActionState(saveTeslaDataReport, {});
+  const [defaults, setDefaults] = useState<FormDefaults>(() =>
+    initialDefaults(type, today),
+  );
+  const [aiFields, setAiFields] = useState<ReadonlySet<string>>(new Set());
+  const [fieldVersion, setFieldVersion] = useState(0);
+
+  function applyExtractedFields(fields: FormDefaults) {
+    setDefaults(fields);
+    setAiFields(new Set(Object.keys(fields)));
+    setFieldVersion((version) => version + 1);
+  }
+
   return (
     <form action={action} className="space-y-5">
       <input type="hidden" name="type" value={type} />
-      {type === "charging" ? (
-        <ChargingFields today={today} />
-      ) : type === "ownership" ? (
-        <OwnershipFields today={today} />
-      ) : (
-        <PriceFields today={today} />
+      {aiEnabled && (
+        <AiImageAssist type={type} onExtract={applyExtractedFields} />
       )}
+      <AiFieldContext.Provider value={aiFields}>
+        <div key={fieldVersion} className="space-y-5">
+          {type === "charging" ? (
+            <ChargingFields today={today} defaults={defaults} />
+          ) : type === "ownership" ? (
+            <OwnershipFields today={today} defaults={defaults} />
+          ) : (
+            <PriceFields today={today} defaults={defaults} />
+          )}
+        </div>
+      </AiFieldContext.Provider>
       {state.error && (
         <p
           role="alert"
