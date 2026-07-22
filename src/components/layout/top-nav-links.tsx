@@ -41,13 +41,6 @@ export function TopNavLinks({
   return (
     <nav className="hidden h-16 items-center gap-6 md:flex">
       <Link
-        href="/"
-        aria-current={pathname === "/" ? "page" : undefined}
-        className={linkClassName(pathname === "/")}
-      >
-        注目
-      </Link>
-      <Link
         href="/tesla-data"
         aria-current={dataActive ? "page" : undefined}
         className={linkClassName(dataActive)}
