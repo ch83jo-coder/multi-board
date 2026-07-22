@@ -8,6 +8,7 @@ import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
 import { GuestDeleteForm } from "@/components/forms/guest-delete-form";
 import { VoteButtons } from "@/components/forms/vote-buttons";
+import { ShareToXButton } from "@/components/posts/share-to-x-button";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, buttonStyles } from "@/components/ui/button";
@@ -163,32 +164,35 @@ export default async function PostPage({ params }: Props) {
                 </p>
               </div>
             </div>
-            {canEdit && (
-              <div className="flex flex-wrap justify-end gap-2">
-                <Link
-                  href={`/boards/${slug}/${postId}/edit`}
-                  className={buttonStyles({ variant: "outline" })}
-                >
-                  編集
-                </Link>
-                {canManageDirectly ? (
-                  <form action={deletePost}>
-                    <input type="hidden" name="postId" value={postId} />
-                    <input type="hidden" name="slug" value={slug} />
-                    <Button type="submit" variant="destructive">
-                      削除
-                    </Button>
-                  </form>
-                ) : (
-                  <GuestDeleteForm
-                    kind="post"
-                    targetId={postId}
-                    postId={postId}
-                    slug={slug}
-                  />
-                )}
-              </div>
-            )}
+            <div className="flex flex-wrap justify-end gap-2">
+              <ShareToXButton title={post.title} url={canonicalUrl} />
+              {canEdit && (
+                <>
+                  <Link
+                    href={`/boards/${slug}/${postId}/edit`}
+                    className={buttonStyles({ variant: "outline" })}
+                  >
+                    編集
+                  </Link>
+                  {canManageDirectly ? (
+                    <form action={deletePost}>
+                      <input type="hidden" name="postId" value={postId} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <Button type="submit" variant="destructive">
+                        削除
+                      </Button>
+                    </form>
+                  ) : (
+                    <GuestDeleteForm
+                      kind="post"
+                      targetId={postId}
+                      postId={postId}
+                      slug={slug}
+                    />
+                  )}
+                </>
+              )}
+            </div>
           </div>
           {viewer?.role === "admin" && (
             <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-border-subtle pt-4">
