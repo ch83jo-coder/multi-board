@@ -5,9 +5,7 @@ import { getBoards, getViewer } from "@/lib/data";
 
 export async function SideNav() {
   const [viewer, boards] = await Promise.all([getViewer(), getBoards()]);
-  const links: [string, string, string][] = [
-    ["database", "実測データ", "/tesla-data"],
-  ];
+  const links: [string, string, string][] = [];
   if (viewer?.role === "admin")
     links.push(["settings", "設定", "/admin/boards"]);
   return (
@@ -21,6 +19,18 @@ export async function SideNav() {
         </p>
         <nav className="mt-6 flex min-h-0 flex-1 flex-col">
           <div className="space-y-1">
+            <button
+              type="button"
+              disabled
+              title="準備中"
+              className="flex w-full cursor-not-allowed items-center gap-3 rounded px-3 py-2.5 text-text-muted opacity-50"
+            >
+              <MaterialIcon name="database" />
+              <span className="font-label-md text-label-md">実測データ</span>
+              <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px]">
+                準備中
+              </span>
+            </button>
             {links.map(([icon, label, href]) => (
               <Link
                 key={label}

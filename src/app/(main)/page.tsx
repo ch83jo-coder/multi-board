@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BoardLinkGrid } from "@/components/boards/board-link-grid";
 import { Hero } from "@/components/home/hero";
-import { RightSidebar } from "@/components/home/right-sidebar";
 import { FeedRow } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { Pagination } from "@/components/ui/pagination";
@@ -10,8 +9,6 @@ import {
   getBoards,
   getHomePostCount,
   getHomePosts,
-  getPopularBoards,
-  getTrendingKeywords,
   getViewer,
   POSTS_PER_PAGE,
   parseHomeSort,
@@ -39,18 +36,9 @@ export default async function HomePage({
   const requestedPage = Number.isFinite(parsedPage)
     ? Math.max(1, Math.floor(parsedPage))
     : 1;
-  const [
-    total,
-    boards,
-    popularBoards,
-    trendingKeywords,
-    requestedPosts,
-    viewer,
-  ] = await Promise.all([
+  const [total, boards, requestedPosts, viewer] = await Promise.all([
     getHomePostCount(sort),
     getBoards(),
-    getPopularBoards(),
-    getTrendingKeywords(),
     getHomePosts(sort, requestedPage),
     getViewer(),
   ]);
@@ -59,64 +47,50 @@ export default async function HomePage({
   const posts =
     page === requestedPage ? requestedPosts : await getHomePosts(sort, page);
   return (
-    <div className="flex gap-gutter">
-      <div className="min-w-0 flex-1 space-y-6">
-        <Hero boards={boards} isAuthenticated={Boolean(viewer)} />
-        <section
-          className="space-y-3 md:hidden"
-          aria-labelledby="mobile-boards"
-        >
-          <div className="flex items-center justify-between">
-            <h2
-              id="mobile-boards"
-              className="font-headline-md text-headline-md"
-            >
-              Tesla掲示板
-            </h2>
-            <Link
-              href="/boards"
-              className="text-body-sm font-semibold text-primary hover:underline"
-            >
-              すべて見る
-            </Link>
-          </div>
-          <BoardLinkGrid boards={boards} />
-        </section>
-        <div className="flex items-center border-b border-border-subtle pb-4">
-          <div className="inline-flex rounded-lg bg-muted p-1">
-            {sortTabs.map((tab) => (
-              <Link
-                key={tab.value}
-                href={tab.value === "trending" ? "/" : `/?sort=${tab.value}`}
-                aria-current={sort === tab.value ? "page" : undefined}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-body-sm font-medium transition-colors ${sort === tab.value ? "bg-white text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface"}`}
-              >
-                {tab.icon && (
-                  <MaterialIcon name={tab.icon} className="text-sm" />
-                )}
-                {tab.label}
-              </Link>
-            ))}
-          </div>
+    <div className="min-w-0 space-y-6">
+      <Hero boards={boards} isAuthenticated={Boolean(viewer)} />
+      <section className="space-y-3 md:hidden" aria-labelledby="mobile-boards">
+        <div className="flex items-center justify-between">
+          <h2 id="mobile-boards" className="font-headline-md text-headline-md">
+            Tesla掲示板
+          </h2>
+          <Link
+            href="/boards"
+            className="text-body-sm font-semibold text-primary hover:underline"
+          >
+            すべて見る
+          </Link>
         </div>
-        <section className="divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle bg-border-subtle">
-          {posts.length ? (
-            posts.map((post) => <FeedRow key={post.id} post={post} />)
-          ) : (
-            <div className="bg-white px-6 py-14 text-center text-body-md text-text-muted">
-              この期間の投稿はありません。
-            </div>
-          )}
-        </section>
-        <Pagination
-          current={page}
-          pages={pages}
-          sort={sort === "trending" ? undefined : sort}
-        />
+        <BoardLinkGrid boards={boards} />
+      </section>
+      <div className="flex items-center border-b border-border-subtle pb-4">
+        <div className="inline-flex rounded-lg bg-muted p-1">
+          {sortTabs.map((tab) => (
+            <Link
+              key={tab.value}
+              href={tab.value === "trending" ? "/" : `/?sort=${tab.value}`}
+              aria-current={sort === tab.value ? "page" : undefined}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-body-sm font-medium transition-colors ${sort === tab.value ? "bg-white text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface"}`}
+            >
+              {tab.icon && <MaterialIcon name={tab.icon} className="text-sm" />}
+              {tab.label}
+            </Link>
+          ))}
+        </div>
       </div>
-      <RightSidebar
-        boards={popularBoards}
-        trendingKeywords={trendingKeywords}
+      <section className="divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle bg-border-subtle">
+        {posts.length ? (
+          posts.map((post) => <FeedRow key={post.id} post={post} />)
+        ) : (
+          <div className="bg-white px-6 py-14 text-center text-body-md text-text-muted">
+            この期間の投稿はありません。
+          </div>
+        )}
+      </section>
+      <Pagination
+        current={page}
+        pages={pages}
+        sort={sort === "trending" ? undefined : sort}
       />
     </div>
   );
