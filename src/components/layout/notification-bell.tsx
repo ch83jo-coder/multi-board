@@ -75,7 +75,11 @@ export function NotificationBell({
           <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
             <strong className="font-headline-md text-lg">通知</strong>
             <span className="text-label-sm text-text-muted">
-              {pending ? "既読にしています..." : "最新10件"}
+              {pending
+                ? "既読にしています..."
+                : notifications.length > 0
+                  ? `最新${notifications.length}件`
+                  : "0件"}
             </span>
           </div>
           {error && (
