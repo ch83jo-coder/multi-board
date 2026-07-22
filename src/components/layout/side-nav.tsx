@@ -7,8 +7,6 @@ export async function SideNav() {
   const [viewer, boards] = await Promise.all([getViewer(), getBoards()]);
   const links: [string, string, string][] = [
     ["database", "実測データ", "/tesla-data"],
-    ["leaderboard", "ランキング", "/?sort=top"],
-    ["trending_up", "人気", "/"],
   ];
   if (viewer?.role === "admin")
     links.push(["settings", "設定", "/admin/boards"]);
