@@ -226,14 +226,8 @@ export default async function PostPage({ params }: Props) {
             </div>
           )}
         </header>
-        <div className="flex gap-5 p-5 md:p-7">
-          <VoteButtons
-            postId={postId}
-            slug={slug}
-            count={post.vote_count}
-            initialVote={initialVote}
-          />
-          <article className="min-w-0 flex-1 text-body-lg leading-7 text-on-surface-variant">
+        <div className="p-5 md:p-7">
+          <article className="min-w-0 text-body-lg leading-7 text-on-surface-variant">
             {post.thumbnail_url && (
               <figure className="mb-6 overflow-hidden rounded-lg border border-border-subtle bg-surface-container">
                 <Image
@@ -248,6 +242,14 @@ export default async function PostPage({ params }: Props) {
             )}
             <LinkifiedText>{post.content}</LinkifiedText>
           </article>
+          <div className="mt-6 flex justify-center border-t border-border-subtle pt-6">
+            <VoteButtons
+              postId={postId}
+              slug={slug}
+              count={post.vote_count}
+              initialVote={initialVote}
+            />
+          </div>
         </div>
       </Card>
       <Card className="p-5 md:p-7">
