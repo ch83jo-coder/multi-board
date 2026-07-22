@@ -26,57 +26,29 @@ export function TopNavLinks({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const rootRef = useDismissibleMenu(open, setOpen);
-  const inlineBoards = boards.slice(0, 4);
-  const overflowBoards = boards.slice(inlineBoards.length);
   const dataActive =
     pathname === "/tesla-data" || pathname.startsWith("/tesla-data/");
   const isBoardActive = (slug: string) => {
     const href = `/boards/${slug}`;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
-  const allBoardsActive =
+  const teslaActive =
+    dataActive ||
     pathname === "/boards" ||
-    overflowBoards.some((board) => isBoardActive(board.slug));
+    boards.some((board) => isBoardActive(board.slug));
 
   return (
     <nav className="hidden h-16 items-center gap-6 md:flex">
-      <Link
-        href="/"
-        aria-current={pathname === "/" ? "page" : undefined}
-        className={linkClassName(pathname === "/")}
-      >
-        注目
-      </Link>
-      <Link
-        href="/tesla-data"
-        aria-current={dataActive ? "page" : undefined}
-        className={linkClassName(dataActive)}
-      >
-        実測データ
-      </Link>
-      {inlineBoards.map((board) => {
-        const href = `/boards/${board.slug}`;
-        const active = isBoardActive(board.slug);
-        return (
-          <Link
-            key={board.id}
-            href={href}
-            aria-current={active ? "page" : undefined}
-            className={linkClassName(active)}
-          >
-            {board.name}
-          </Link>
-        );
-      })}
       <div ref={rootRef} className="relative h-16">
         <button
           type="button"
           aria-expanded={open}
           aria-haspopup="menu"
           onClick={() => setOpen((value) => !value)}
-          className={linkClassName(allBoardsActive)}
+          className={linkClassName(teslaActive)}
         >
-          すべて
+          <MaterialIcon name="electric_car" className="text-[19px]" />
+          Tesla
           <MaterialIcon
             name="expand_more"
             className={`text-[18px] transition-transform ${open ? "rotate-180" : ""}`}
@@ -85,10 +57,32 @@ export function TopNavLinks({
         {open && (
           <div
             role="menu"
-            aria-label="掲示板メニュー"
+            aria-label="Teslaメニュー"
             className="absolute left-0 top-14 z-50 w-64 overflow-hidden rounded-lg border border-border-subtle bg-white shadow-xl"
           >
+            <div className="border-b border-border-subtle px-4 py-3">
+              <p className="font-label-sm text-label-sm text-text-muted">
+                TESLA COMMUNITY
+              </p>
+            </div>
             <div className="max-h-80 overflow-y-auto py-2">
+              <Link
+                role="menuitem"
+                href="/tesla-data"
+                aria-current={dataActive ? "page" : undefined}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 px-4 py-2.5 text-body-sm transition-colors ${
+                  dataActive
+                    ? "bg-accent font-semibold text-accent-foreground"
+                    : "text-on-surface hover:bg-surface-alt"
+                }`}
+              >
+                <MaterialIcon
+                  name="database"
+                  className="text-[20px] text-text-muted"
+                />
+                <span>実測データ</span>
+              </Link>
               {boards.map((board) => {
                 const href = `/boards/${board.slug}`;
                 const active = isBoardActive(board.slug);
@@ -121,7 +115,7 @@ export function TopNavLinks({
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between rounded px-3 py-2 text-body-sm font-semibold text-primary hover:bg-surface-alt"
               >
-                掲示板一覧を見る
+                Tesla掲示板一覧
                 <MaterialIcon name="arrow_forward" className="text-[18px]" />
               </Link>
             </div>
