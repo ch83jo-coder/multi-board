@@ -13,10 +13,12 @@ export function ShareToXButton({ title, url }: Props) {
   const share = async () => {
     // モバイルでは x.com のインテント URL がアプリの Web ログイン画面に遷移してしまうため、
     // OS の共有シートを開いてアプリを選択し、ログイン済みのアプリから直接投稿できるようにする。
-    if (
-      typeof navigator !== "undefined" &&
-      typeof navigator.share === "function"
-    ) {
+    // デスクトップブラウザも navigator.share を実装しているため、
+    // タッチ主体のデバイスに限定し、PC は従来のインテント URL を維持する。
+    const isTouchPrimaryDevice = window.matchMedia(
+      "(hover: none) and (pointer: coarse)",
+    ).matches;
+    if (isTouchPrimaryDevice && typeof navigator.share === "function") {
       try {
         await navigator.share({ text: title, url });
         return;
