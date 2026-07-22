@@ -585,8 +585,7 @@ function AiImageAssist({
           setMessage({ kind: "error", text: result.error });
           return;
         }
-        if (result.fields && Object.keys(result.fields).length > 0)
-          onExtract(result.fields);
+        if (result.fields) onExtract(result.fields);
         setMessage({
           kind: "success",
           text: result.success ?? "画像の読み取りが完了しました。",
@@ -680,7 +679,7 @@ export function DataReportForm({
   const [fieldVersion, setFieldVersion] = useState(0);
 
   function applyExtractedFields(fields: FormDefaults) {
-    setDefaults(fields);
+    setDefaults((current) => ({ ...current, ...fields }));
     setAiFields(new Set(Object.keys(fields)));
     setFieldVersion((version) => version + 1);
   }
