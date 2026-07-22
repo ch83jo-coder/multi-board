@@ -19,6 +19,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 308);
   }
 
+  if (
+    request.nextUrl.pathname === "/tesla-data" ||
+    request.nextUrl.pathname.startsWith("/tesla-data/")
+  ) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
   if (!hasSupabaseEnv()) return NextResponse.next();
   const hasSupabaseSession = request.cookies
     .getAll()
