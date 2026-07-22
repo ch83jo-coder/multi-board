@@ -44,7 +44,12 @@ export function VoteButtons({
           variant={currentVote === 1 ? "active" : "outline"}
           size="icon"
         >
-          <MaterialIcon name="expand_less" />
+          <MaterialIcon
+            name="thumb_up"
+            className={
+              currentVote === 1 ? "[font-variation-settings:'FILL'_1]" : ""
+            }
+          />
         </Button>
         <strong className="min-w-6 text-center text-lg text-on-surface">
           {currentCount}
@@ -58,7 +63,12 @@ export function VoteButtons({
           variant={currentVote === -1 ? "active" : "outline"}
           size="icon"
         >
-          <MaterialIcon name="expand_more" />
+          <MaterialIcon
+            name="thumb_down"
+            className={
+              currentVote === -1 ? "[font-variation-settings:'FILL'_1]" : ""
+            }
+          />
         </Button>
       </div>
       {message && (
