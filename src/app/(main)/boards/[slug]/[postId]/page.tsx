@@ -145,9 +145,11 @@ export default async function PostPage({ params }: Props) {
       </nav>
       <Card className="overflow-hidden">
         <header className="border-b border-border-subtle p-5 md:p-7">
-          <div className="flex items-center gap-2 text-body-sm text-text-muted">
+          <div className="flex flex-wrap items-center gap-2 text-body-sm text-text-muted">
             {post.is_notice && <Chip tone="success">お知らせ</Chip>}
             {post.is_pinned && <Chip tone="primary">固定</Chip>}
+            <span>番号 {post.post_number}</span>
+            <span>·</span>
             <span>{formatDate(post.created_at)}</span>
             <span>·</span>
             <span>閲覧 {post.view_count}回</span>

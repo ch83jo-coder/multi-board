@@ -22,6 +22,7 @@ export type Board = {
 
 export type Post = {
   id: string;
+  post_number: number;
   board_id: string;
   board?: Pick<Board, "slug" | "name" | "icon">;
   author_id: string | null;

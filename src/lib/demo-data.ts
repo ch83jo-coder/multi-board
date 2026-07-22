@@ -50,6 +50,7 @@ const iso = (hours: number) => new Date(now - hours * 3_600_000).toISOString();
 export const demoPosts: Post[] = [
   {
     id: "welcome",
+    post_number: 1,
     board_id: "board-humor",
     board: {
       slug: "humor",
@@ -73,6 +74,7 @@ export const demoPosts: Post[] = [
   },
   {
     id: "cat-chef",
+    post_number: 6,
     board_id: "board-humor",
     board: {
       slug: "humor",
@@ -97,6 +99,7 @@ export const demoPosts: Post[] = [
   },
   {
     id: "remote-pajamas",
+    post_number: 5,
     board_id: "board-humor",
     board: {
       slug: "humor",
@@ -120,6 +123,7 @@ export const demoPosts: Post[] = [
   },
   {
     id: "captcha",
+    post_number: 4,
     board_id: "board-humor",
     board: {
       slug: "humor",
@@ -142,6 +146,7 @@ export const demoPosts: Post[] = [
   },
   {
     id: "launch",
+    post_number: 3,
     board_id: "board-news",
     board: { slug: "news", name: "ニュース", icon: "newspaper" },
     author_id: "editor",
@@ -162,6 +167,7 @@ export const demoPosts: Post[] = [
   },
   {
     id: "framework-poll",
+    post_number: 2,
     board_id: "board-game",
     board: { slug: "game", name: "ゲーム", icon: "sports_esports" },
     author_id: "dev",

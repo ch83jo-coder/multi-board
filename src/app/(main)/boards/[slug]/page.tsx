@@ -132,13 +132,8 @@ export default async function BoardPage({ params, searchParams }: Props) {
         </div>
         <div className="divide-y divide-border-subtle">
           {posts.length ? (
-            posts.map((post, index) => (
-              <BoardRow
-                key={post.id}
-                post={post}
-                number={(page - 1) * POSTS_PER_PAGE + index + 1}
-                slug={slug}
-              />
+            posts.map((post) => (
+              <BoardRow key={post.id} post={post} slug={slug} />
             ))
           ) : (
             <div className="px-6 py-14 text-center text-body-md text-text-muted">
