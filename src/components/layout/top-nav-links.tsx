@@ -27,12 +27,14 @@ export function TopNavLinks({
   const [open, setOpen] = useState(false);
   const rootRef = useDismissibleMenu(open, setOpen);
   const inlineBoards = boards.slice(0, 4);
+  const overflowBoards = boards.slice(inlineBoards.length);
   const isBoardActive = (slug: string) => {
     const href = `/boards/${slug}`;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
   const allBoardsActive =
-    pathname === "/boards" || boards.some((board) => isBoardActive(board.slug));
+    pathname === "/boards" ||
+    overflowBoards.some((board) => isBoardActive(board.slug));
 
   return (
     <nav className="hidden h-16 items-center gap-6 md:flex">
