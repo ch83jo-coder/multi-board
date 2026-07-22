@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Chip } from "@/components/ui/chip";
 import { formatCompact, formatDate } from "@/components/ui/feed-row";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import { displayAuthorName } from "@/lib/author";
@@ -23,9 +24,14 @@ export function BoardRow({
         {post.is_pinned ? "固定" : number}
       </div>
       <div className="flex min-w-0 items-center gap-2">
+        {post.is_notice && (
+          <span className="shrink-0">
+            <Chip tone="success">お知らせ</Chip>
+          </span>
+        )}
         <Link
           href={`/boards/${slug}/${post.id}`}
-          className="truncate text-body-md font-medium hover:text-primary"
+          className="min-w-0 truncate text-body-md font-medium hover:text-primary"
         >
           {post.title}
         </Link>
