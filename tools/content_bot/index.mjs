@@ -360,7 +360,7 @@ async function requestOpenAI(body, apiKey) {
         signal: AbortSignal.timeout(180000),
       });
     } catch (error) {
-      if (attempt === maxAttempts) throw stepError("OpenAIへの接続", error);
+      if (attempt === maxAttempts) throw createOpenAIConnectionError(error);
       await wait(1000 * attempt);
       continue;
     }
@@ -401,6 +401,39 @@ async function requestOpenAI(body, apiKey) {
     throw new Error(`OpenAI API HTTP ${response.status}: ${message}`);
   }
   throw new Error("OpenAI APIの再試行回数を超えました。");
+}
+
+function createOpenAIConnectionError(error) {
+  const cause = error instanceof Error ? error.cause : null;
+  const code =
+    cause && typeof cause === "object" && "code" in cause
+      ? String(cause.code)
+      : null;
+
+  if (code === "ENOTFOUND" || code === "EAI_AGAIN") {
+    return new Error(
+      `api.openai.comの名前解決に失敗しました (${code})。インターネット接続とDNS設定を確認してください。`,
+    );
+  }
+  if (code === "ECONNREFUSED") {
+    return new Error(
+      "api.openai.comへの接続が拒否されました。プロキシ、VPN、ファイアウォールの設定を確認してください。",
+    );
+  }
+  if (
+    code === "ETIMEDOUT" ||
+    (error instanceof Error && error.name === "TimeoutError")
+  ) {
+    return new Error(
+      "OpenAI APIへの接続がタイムアウトしました。ネットワークを確認してから再実行してください。",
+    );
+  }
+  if (code?.startsWith("CERT_")) {
+    return new Error(
+      `OpenAI APIとのTLS証明書検証に失敗しました (${code})。プロキシまたは端末の証明書設定を確認してください。`,
+    );
+  }
+  return stepError("OpenAIへの接続", error);
 }
 
 function extractResponseText(payload) {
