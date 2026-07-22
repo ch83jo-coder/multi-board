@@ -29,7 +29,7 @@ export async function TopNavBar() {
           >
             Panmoa
           </Link>
-          <TopNavLinks boards={boards.slice(0, 4)} />
+          <TopNavLinks boards={boards} />
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <form action="/search" className="relative hidden w-64 lg:block">
