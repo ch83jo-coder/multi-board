@@ -8,6 +8,7 @@ import { CommentItem } from "@/components/comments/comment-item";
 import { CommentForm } from "@/components/forms/comment-form";
 import { GuestDeleteForm } from "@/components/forms/guest-delete-form";
 import { VoteButtons } from "@/components/forms/vote-buttons";
+import { LinkifiedText } from "@/components/posts/linkified-text";
 import { ShareToXButton } from "@/components/posts/share-to-x-button";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Avatar } from "@/components/ui/avatar";
@@ -243,7 +244,7 @@ export default async function PostPage({ params }: Props) {
                 />
               </figure>
             )}
-            <div className="whitespace-pre-wrap">{post.content}</div>
+            <LinkifiedText>{post.content}</LinkifiedText>
           </article>
         </div>
       </Card>
