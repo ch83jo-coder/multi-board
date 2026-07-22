@@ -26,8 +26,16 @@ import {
 import type { TeslaDataType } from "@/lib/types";
 
 type FormDefaults = Record<string, string>;
+type AiFieldMeta = {
+  sourceText: string | null;
+  confidence: number;
+  inferred: boolean;
+  calculation: string | null;
+};
 
-const AiFieldContext = createContext<ReadonlySet<string>>(new Set());
+const AiFieldContext = createContext<ReadonlyMap<string, AiFieldMeta>>(
+  new Map(),
+);
 
 function initialDefaults(type: TeslaDataType, today: string): FormDefaults {
   if (type === "charging")
@@ -64,7 +72,8 @@ function Field({
   hint?: string;
   children: React.ReactNode;
 }) {
-  const aiFilled = useContext(AiFieldContext).has(fieldName);
+  const aiMeta = useContext(AiFieldContext).get(fieldName);
+  const aiFilled = Boolean(aiMeta);
   return (
     <label
       className={`block rounded-lg transition-colors ${aiFilled ? "-m-2 border border-primary/15 bg-primary/5 p-2" : ""}`}
@@ -74,13 +83,23 @@ function Field({
         <span>{label}</span>
         {aiFilled && (
           <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-on-primary">
-            AI入力・要確認
+            {aiMeta?.inferred ? "AI推定・要確認" : "AI入力・要確認"}
           </span>
         )}
       </span>
       {children}
       {hint && (
         <span className="mt-1 block text-label-sm text-text-muted">{hint}</span>
+      )}
+      {aiMeta && (aiMeta.sourceText || aiMeta.calculation) && (
+        <span className="mt-1.5 block rounded bg-primary/5 px-2 py-1.5 text-label-sm text-text-muted">
+          {aiMeta.inferred && aiMeta.calculation
+            ? `推定根拠: ${aiMeta.calculation}`
+            : `読取根拠: ${aiMeta.sourceText}`}
+          <span className="ml-2 whitespace-nowrap">
+            信頼度 {Math.round(aiMeta.confidence * 100)}%
+          </span>
+        </span>
       )}
     </label>
   );
@@ -297,6 +316,7 @@ function OwnershipFields({
   defaults: FormDefaults;
 }) {
   const currentYear = today.slice(0, 4);
+  const [category, setCategory] = useState(defaults.category ?? "maintenance");
   return (
     <>
       <div className="grid gap-5 sm:grid-cols-2">
@@ -359,13 +379,25 @@ function OwnershipFields({
             id="ownership-category"
             name="category"
             defaultValue={defaults.category ?? ""}
+            onChange={(event) => setCategory(event.currentTarget.value)}
             required
           >
             <option value="">選択してください</option>
             <OptionList options={OWNERSHIP_CATEGORIES} />
           </Select>
         </Field>
-        <Field label="支払額" htmlFor="ownership-amount" fieldName="amountYen">
+        <Field
+          label={
+            category === "insurance" ? "年間保険料（年額）" : "支払額（総額）"
+          }
+          htmlFor="ownership-amount"
+          fieldName="amountYen"
+          hint={
+            category === "insurance"
+              ? "年額を入力します。画像が月額表記だけの場合、AIは月額×12の推定年額と計算根拠を入力します。"
+              : "今回発生した費用の合計額を入力してください。"
+          }
+        >
           <div className="relative">
             <Input
               id="ownership-amount"
@@ -422,6 +454,15 @@ function PriceFields({
   defaults: FormDefaults;
 }) {
   const currentYear = today.slice(0, 4);
+  const [reportType, setReportType] = useState(
+    defaults.reportType ?? "insurance",
+  );
+  const amountLabel =
+    reportType === "insurance"
+      ? "年間保険料（年額）"
+      : reportType === "subsidy"
+        ? "補助金額"
+        : "中古車価格";
   return (
     <>
       <div className="grid gap-5 sm:grid-cols-2">
@@ -430,6 +471,7 @@ function PriceFields({
             id="report-type"
             name="reportType"
             defaultValue={defaults.reportType ?? ""}
+            onChange={(event) => setReportType(event.currentTarget.value)}
             required
           >
             <option value="">選択してください</option>
@@ -479,7 +521,16 @@ function PriceFields({
             <PrefectureOptions />
           </Select>
         </Field>
-        <Field label="金額" htmlFor="price-amount" fieldName="amountYen">
+        <Field
+          label={amountLabel}
+          htmlFor="price-amount"
+          fieldName="amountYen"
+          hint={
+            reportType === "insurance"
+              ? "年額を入力します。画像が月額表記だけの場合、AIは月額×12の推定年額と計算根拠を入力します。"
+              : undefined
+          }
+        >
           <div className="relative">
             <Input
               id="price-amount"
@@ -546,7 +597,10 @@ function AiImageAssist({
   onExtract,
 }: {
   type: TeslaDataType;
-  onExtract: (fields: FormDefaults) => void;
+  onExtract: (
+    fields: FormDefaults,
+    fieldMeta: Record<string, AiFieldMeta>,
+  ) => void;
 }) {
   const imageRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{
@@ -585,7 +639,7 @@ function AiImageAssist({
           setMessage({ kind: "error", text: result.error });
           return;
         }
-        if (result.fields) onExtract(result.fields);
+        if (result.fields) onExtract(result.fields, result.fieldMeta ?? {});
         setMessage({
           kind: "success",
           text: result.success ?? "画像の読み取りが完了しました。",
@@ -675,12 +729,17 @@ export function DataReportForm({
   const [defaults, setDefaults] = useState<FormDefaults>(() =>
     initialDefaults(type, today),
   );
-  const [aiFields, setAiFields] = useState<ReadonlySet<string>>(new Set());
+  const [aiFields, setAiFields] = useState<ReadonlyMap<string, AiFieldMeta>>(
+    new Map(),
+  );
   const [fieldVersion, setFieldVersion] = useState(0);
 
-  function applyExtractedFields(fields: FormDefaults) {
+  function applyExtractedFields(
+    fields: FormDefaults,
+    fieldMeta: Record<string, AiFieldMeta>,
+  ) {
     setDefaults((current) => ({ ...current, ...fields }));
-    setAiFields(new Set(Object.keys(fields)));
+    setAiFields(new Map(Object.entries(fieldMeta)));
     setFieldVersion((version) => version + 1);
   }
 
