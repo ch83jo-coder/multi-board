@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/og_image.png",
+        url: "/og_image_v2.png",
         width: 1536,
         height: 1024,
         alt: "Panmoa Teslaオーナーコミュニティ",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: ["/og_image.png"],
+    images: ["/og_image_v2.png"],
   },
 };
 

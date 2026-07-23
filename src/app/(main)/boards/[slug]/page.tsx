@@ -48,13 +48,13 @@ export async function generateMetadata({
       title,
       description,
       url: canonical,
-      images: ["/og_image.png"],
+      images: ["/og_image_v2.png"],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/og_image.png"],
+      images: ["/og_image_v2.png"],
     },
   };
 }

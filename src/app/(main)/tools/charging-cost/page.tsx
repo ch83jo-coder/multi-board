@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     title,
     description,
     url: "/tools/charging-cost",
-    images: ["/og_image.png"],
+    images: ["/og_image_v2.png"],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/og_image.png"],
+    images: ["/og_image_v2.png"],
   },
 };
 
