@@ -19,18 +19,15 @@ export async function SideNav() {
         </p>
         <nav className="mt-6 flex min-h-0 flex-1 flex-col">
           <div className="space-y-1">
-            <button
-              type="button"
-              disabled
-              title="準備中"
-              className="flex w-full cursor-not-allowed items-center gap-3 rounded px-3 py-2.5 text-text-muted opacity-50"
+            <Link
+              href="/tools/charging-cost"
+              className="flex items-center gap-3 rounded px-3 py-2.5 text-text-muted transition-colors hover:bg-surface-variant hover:text-primary"
             >
-              <MaterialIcon name="database" />
-              <span className="font-label-md text-label-md">実測データ</span>
-              <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px]">
-                準備中
+              <MaterialIcon name="calculate" />
+              <span className="font-label-md text-label-md">
+                充電コスト計算
               </span>
-            </button>
+            </Link>
             {links.map(([icon, label, href]) => (
               <Link
                 key={label}

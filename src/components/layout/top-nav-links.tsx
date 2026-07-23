@@ -28,6 +28,7 @@ export function TopNavLinks({
   const rootRef = useDismissibleMenu(open, setOpen);
   const inlineBoards = boards.slice(0, 4);
   const overflowBoards = boards.slice(inlineBoards.length);
+  const toolsActive = pathname.startsWith("/tools/");
   const isBoardActive = (slug: string) => {
     const href = `/boards/${slug}`;
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -38,17 +39,13 @@ export function TopNavLinks({
 
   return (
     <nav className="hidden h-16 items-center gap-6 md:flex">
-      <button
-        type="button"
-        disabled
-        title="準備中"
-        className={`${baseLinkClass} cursor-not-allowed gap-1.5 text-text-muted opacity-50`}
+      <Link
+        href="/tools/charging-cost"
+        aria-current={toolsActive ? "page" : undefined}
+        className={`${linkClassName(toolsActive)} gap-1.5`}
       >
-        実測データ
-        <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] leading-none">
-          準備中
-        </span>
-      </button>
+        充電計算
+      </Link>
       {inlineBoards.map((board) => {
         const href = `/boards/${board.slug}`;
         const active = isBoardActive(board.slug);

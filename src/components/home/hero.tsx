@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { Button, buttonStyles } from "@/components/ui/button";
+import { buttonStyles } from "@/components/ui/button";
 import { MaterialIcon } from "@/components/ui/material-icon";
 import type { Board } from "@/lib/types";
 
 const benefits = [
   {
-    icon: "speed",
-    title: "実測データを比較",
-    description: "充電速度や待ち時間を、地域と条件ごとに確認できます。",
+    icon: "calculate",
+    title: "充電コストを比較",
+    description: "自宅とスーパーチャージャーの月額差をすぐ計算できます。",
   },
   {
     icon: "payments",
@@ -51,17 +51,13 @@ export function Hero({
             カタログだけでは分からない実測値と所有体験を比較して、購入前も納車後も迷いを減らせるTesla専門コミュニティです。
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            {isAuthenticated ? (
-              <Button type="button" size="lg" disabled title="準備中">
-                <MaterialIcon name="add_chart" className="text-[19px]" />
-                実測データ共有（準備中）
-              </Button>
-            ) : (
-              <Link href="/signup" className={buttonStyles({ size: "lg" })}>
-                <MaterialIcon name="person_add" className="text-[19px]" />
-                無料で会員登録
-              </Link>
-            )}
+            <Link
+              href="/tools/charging-cost"
+              className={buttonStyles({ size: "lg" })}
+            >
+              <MaterialIcon name="calculate" className="text-[19px]" />
+              充電コストを計算
+            </Link>
             <Link
               href={isAuthenticated ? boardHref : questionHref}
               className={buttonStyles({ variant: "outline", size: "lg" })}
@@ -71,7 +67,7 @@ export function Hero({
             </Link>
           </div>
           <p className="mt-3 text-label-sm text-text-muted">
-            閲覧は登録不要。会員登録すると回答・投票、返信通知を利用できます。実測データ共有は準備中です。
+            充電計算と閲覧は登録不要。会員登録すると回答・投票、返信通知を利用できます。
           </p>
         </div>
         <div className="relative flex min-h-64 items-center overflow-hidden bg-inverse-surface p-6 text-inverse-on-surface sm:p-8">
