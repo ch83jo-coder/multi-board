@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const authorName = displayAuthorName(post);
   const images = post.thumbnail_url
     ? [{ url: post.thumbnail_url, alt: post.title }]
-    : [{ url: "/opengraph-image", width: 1200, height: 630 }];
+    : [{ url: "/og_image.png", width: 1536, height: 1024 }];
   return {
     title: post.title,
     description,
@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: post.title,
       description,
-      images: [post.thumbnail_url ?? "/opengraph-image"],
+      images: [post.thumbnail_url ?? "/og_image.png"],
     },
   };
 }

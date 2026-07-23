@@ -43,9 +43,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
+        url: "/og_image.png",
+        width: 1536,
+        height: 1024,
         alt: "Panmoa Teslaオーナーコミュニティ",
         type: "image/png",
       },
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: ["/opengraph-image"],
+    images: ["/og_image.png"],
   },
 };
 

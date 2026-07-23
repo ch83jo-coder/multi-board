@@ -18,7 +18,18 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: "/tools/charging-cost" },
-  openGraph: { title, description, url: "/tools/charging-cost" },
+  openGraph: {
+    title,
+    description,
+    url: "/tools/charging-cost",
+    images: ["/og_image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/og_image.png"],
+  },
 };
 
 const faqs = [
