@@ -283,7 +283,17 @@ async function generatePosts(board, recentTitles, count, env) {
   const schema = createPostSchema(count);
   const requestBody = {
     model: env.model,
-    tools: [{ type: "web_search" }],
+    tools: [
+      {
+        type: "web_search",
+        search_context_size: "high",
+        user_location: {
+          type: "approximate",
+          country: "JP",
+          timezone: "Asia/Tokyo",
+        },
+      },
+    ],
     input: [
       {
         role: "system",
@@ -379,6 +389,9 @@ function buildPrompt(board, recentTitles, count) {
     `説明: ${board.description || "説明なし"}`,
     "",
     `日本で最近話題になっている内容をWeb検索し、この掲示板に合う投稿を${count}件作成してください。`,
+    "検索対象はtesla.comなど特定の公式サイトに限定せず、一般的な検索エンジンのようにWeb全体から探してください。",
+    "Tesla公式サイトだけに偏らず、政府・自治体、充電事業者、保険会社、自動車関連企業、信頼できる報道機関や専門メディアなど、話題に応じて異なる運営元の情報源を確認してください。",
+    "重要な事実は可能な限り複数の独立した情報源で照合し、公式発表が最適な根拠である場合だけ公式サイトを優先してください。",
     "異なる話題を選び、宣伝調・ニュース記事調ではなく、自然な情報共有や感想、問いかけとして書いてください。",
     "AIがTeslaオーナーを装った体験談、実測値、費用、故障事例を作らないでください。実体験が必要な話題は、読者に情報提供を呼びかける形にしてください。",
     "公式情報や信頼できる情報源で確認できる事実と、投稿者の見解・問いかけを明確に分けてください。",
