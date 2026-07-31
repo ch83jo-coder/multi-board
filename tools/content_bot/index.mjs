@@ -1,3 +1,4 @@
+import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 
 const DEFAULT_COUNT = 5;
@@ -24,7 +25,8 @@ main().catch((error) => {
 });
 
 async function main() {
-  const options = parseArguments(process.argv.slice(2));
+  const cliArguments = process.argv.slice(2);
+  let options = parseArguments(cliArguments);
   if (options.help) {
     printUsage();
     return;
@@ -45,8 +47,13 @@ async function main() {
   const boards = await loadActiveBoards(supabase);
 
   if (!options.board && !options.all) {
-    printBoardsAndUsage(boards);
-    return;
+    if (cliArguments.length > 0 || !isInteractiveTerminal()) {
+      printBoardsAndUsage(boards);
+      return;
+    }
+    const selectedOptions = await promptForOptions(boards);
+    if (!selectedOptions) return;
+    options = selectedOptions;
   }
 
   const targets = selectBoards(boards, options);
@@ -188,6 +195,103 @@ function parseCount(value) {
   if (count < 1 || count > MAX_COUNT)
     throw new Error(`--countは1〜${MAX_COUNT}の範囲で指定してください。`);
   return count;
+}
+
+function isInteractiveTerminal() {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
+}
+
+async function promptForOptions(boards) {
+  if (boards.length === 0)
+    throw new Error("有効な掲示板がないため実行できません。");
+
+  const readline = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  try {
+    console.log("\n========== コンテンツボット設定 ==========");
+    console.log("\n投稿先を選択してください:");
+    for (const [index, board] of boards.entries()) {
+      console.log(`  ${index + 1}. ${board.name} (${board.slug})`);
+    }
+    const allChoice = boards.length + 1;
+    console.log(`  ${allChoice}. すべての掲示板`);
+
+    const targetChoice = await askInteger(
+      readline,
+      `選択 [1-${allChoice}]: `,
+      1,
+      allChoice,
+    );
+    const all = targetChoice === allChoice;
+    const board = all ? null : boards[targetChoice - 1];
+    const count = await askInteger(
+      readline,
+      `掲示板ごとの投稿数 [1-${MAX_COUNT}] (${DEFAULT_COUNT}): `,
+      1,
+      MAX_COUNT,
+      DEFAULT_COUNT,
+    );
+    const withImages = await askYesNo(
+      readline,
+      "投稿画像も生成しますか? [y/N]: ",
+      false,
+    );
+
+    console.log("\n---------- 実行内容 ----------");
+    console.log(
+      `投稿先: ${all ? `すべての掲示板 (${boards.length}件)` : `${board.name} (${board.slug})`}`,
+    );
+    console.log(`投稿数: 各${count}件`);
+    console.log(`画像生成: ${withImages ? "あり" : "なし"}`);
+    if (all) {
+      console.log(`最大生成数: ${boards.length * count}件`);
+    }
+
+    const confirmed = await askYesNo(
+      readline,
+      "\nこの内容で実行しますか? [y/N]: ",
+      false,
+    );
+    if (!confirmed) {
+      console.log("[content-bot] 実行をキャンセルしました。");
+      return null;
+    }
+
+    return {
+      all,
+      board: board?.slug ?? null,
+      count,
+      help: false,
+      withImages,
+    };
+  } finally {
+    readline.close();
+  }
+}
+
+async function askInteger(readline, message, minimum, maximum, defaultValue) {
+  while (true) {
+    const answer = (await readline.question(message)).trim();
+    if (answer === "" && defaultValue !== undefined) return defaultValue;
+    if (/^\d+$/.test(answer)) {
+      const value = Number(answer);
+      if (value >= minimum && value <= maximum) return value;
+    }
+    console.log(`${minimum}〜${maximum}の番号を入力してください。`);
+  }
+}
+
+async function askYesNo(readline, message, defaultValue) {
+  while (true) {
+    const answer = (await readline.question(message)).trim().toLowerCase();
+    if (answer === "") return defaultValue;
+    if (answer === "y" || answer === "yes") return true;
+    if (answer === "n" || answer === "no") return false;
+    console.log("yまたはnで入力してください。");
+  }
 }
 
 function readSupabaseEnvironment() {
@@ -869,8 +973,11 @@ function printUsage() {
   console.log(
     [
       "使い方:",
+      "  yarn content-bot",
       "  yarn content-bot --board <slug> [--count <1-10>] [--with-images]",
       "  yarn content-bot --all [--count <1-10>] [--with-images]",
+      "",
+      "引数なしの場合は、投稿先・件数・画像生成を対話形式で選択します。",
       "",
       "例:",
       "  yarn content-bot --board humor",
