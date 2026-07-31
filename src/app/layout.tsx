@@ -86,6 +86,10 @@ export default function RootLayout({
       className={`${inter.variable} ${hanken.variable} ${notoSansJp.variable}`}
     >
       <head>
+        <meta
+          name="google-adsense-account"
+          content="ca-pub-2335270056121269"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
