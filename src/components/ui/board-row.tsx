@@ -15,33 +15,40 @@ export function BoardRow({ post, slug }: { post: Post; slug: string }) {
       >
         {post.post_number}
       </div>
-      <div className="flex min-w-0 items-center gap-2">
-        {post.is_notice && (
-          <span className="shrink-0">
-            <Chip tone="success">お知らせ</Chip>
-          </span>
-        )}
-        {post.is_pinned && (
-          <span
-            aria-hidden="true"
-            title="固定投稿"
-            className="flex rotate-45 shrink-0 items-center text-secondary"
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
+          {post.is_notice && (
+            <span className="shrink-0">
+              <Chip tone="success">お知らせ</Chip>
+            </span>
+          )}
+          {post.is_pinned && (
+            <span
+              aria-hidden="true"
+              title="固定投稿"
+              className="flex rotate-45 shrink-0 items-center text-secondary"
+            >
+              <MaterialIcon name="push_pin" className="text-[18px]" />
+            </span>
+          )}
+          <Link
+            href={`/boards/${slug}/${post.id}`}
+            className="min-w-0 truncate text-body-md font-medium hover:text-primary"
           >
-            <MaterialIcon name="push_pin" className="text-[18px]" />
+            {post.title}
+          </Link>
+          <span className="shrink-0 text-body-sm font-semibold text-primary">
+            [{post.comment_count}]
           </span>
-        )}
-        <Link
-          href={`/boards/${slug}/${post.id}`}
-          className="min-w-0 truncate text-body-md font-medium hover:text-primary"
-        >
-          {post.title}
-        </Link>
-        <span className="shrink-0 text-body-sm font-semibold text-primary">
-          [{post.comment_count}]
-        </span>
-        {post.thumbnail_url && (
-          <MaterialIcon name="image" className="text-[16px] text-primary" />
-        )}
+          {post.thumbnail_url && (
+            <MaterialIcon name="image" className="text-[16px] text-primary" />
+          )}
+        </div>
+        <div className="mt-1 flex items-center gap-1.5 text-label-sm text-text-muted md:hidden">
+          <time dateTime={post.created_at}>{formatDate(post.created_at)}</time>
+          <span aria-hidden="true">·</span>
+          <span>閲覧 {formatCompact(post.view_count)}</span>
+        </div>
       </div>
       <div className="hidden truncate text-body-sm text-on-surface-variant md:block">
         {displayAuthorName(post)}
