@@ -469,10 +469,11 @@ function createPostSchema(count) {
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["title", "content", "topic"],
+          required: ["title", "content", "source_url", "topic"],
           properties: {
             title: { type: "string", minLength: 3, maxLength: 160 },
             content: { type: "string", minLength: 10, maxLength: 1800 },
+            source_url: { type: "string", minLength: 8, maxLength: 2048 },
             topic: { type: "string", minLength: 2, maxLength: 100 },
           },
         },
@@ -500,8 +501,8 @@ function buildPrompt(board, recentTitles, count) {
     "AIがTeslaオーナーを装った体験談、実測値、費用、故障事例を作らないでください。実体験が必要な話題は、読者に情報提供を呼びかける形にしてください。",
     "公式情報や信頼できる情報源で確認できる事実と、投稿者の見解・問いかけを明確に分けてください。",
     "Teslaの充電、保険、補助金、整備、維持費、モデル選びなど、日本のオーナーと購入検討者の意思決定に役立つ話題を優先してください。",
-    "titleは3〜160文字、contentは10〜1800文字、topicは話題を簡潔に表す2〜100文字にしてください。",
-    "各contentの最終行は、確認した一次情報または信頼できる情報源のURLを1つ使い、必ず「参考: https://...」の形式にしてください。",
+    "titleは3〜160文字、contentは出典表記を含めず10〜1800文字、topicは話題を簡潔に表す2〜100文字にしてください。",
+    "source_urlには、確認した一次情報または信頼できる情報源のHTTPS URLを1つだけ入れてください。サイト名、Markdown、「参考:」、説明文は含めないでください。",
     "以下の最近の管理者投稿と同じタイトルや実質的に同じ話題は避けてください。",
     "",
     "最近の管理者投稿タイトル:",
@@ -645,13 +646,35 @@ function validateGeneratedPosts(value, expectedCount) {
       `投稿${index + 1}の本文`,
     );
     const topic = validateText(post.topic, 2, 100, `投稿${index + 1}の話題`);
-    if (!/(?:^|\n)参考:\s*https:\/\/\S+\s*$/u.test(content)) {
-      throw new Error(
-        `投稿${index + 1}の最終行に「参考: https://...」がありません。`,
-      );
-    }
-    return { title, content, topic };
+    const sourceUrl = validateSourceUrl(
+      post.source_url,
+      `投稿${index + 1}の参考URL`,
+    );
+    return {
+      title,
+      content: appendSourceReference(content, sourceUrl),
+      topic,
+    };
   });
+}
+
+function validateSourceUrl(value, label) {
+  const normalized = validateText(value, 8, 2048, label);
+  let url;
+  try {
+    url = new URL(normalized);
+  } catch {
+    throw new Error(`${label}が正しいURLではありません。`);
+  }
+  if (url.protocol !== "https:") {
+    throw new Error(`${label}はHTTPS URLである必要があります。`);
+  }
+  return url.href;
+}
+
+function appendSourceReference(content, sourceUrl) {
+  const body = content.replace(/\n+(?:参考|参照|出典)\s*[:：].*$/u, "").trim();
+  return `${body}\n\n参考: ${sourceUrl}`;
 }
 
 function validateText(value, minimum, maximum, label) {
