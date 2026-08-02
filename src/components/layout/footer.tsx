@@ -1,8 +1,21 @@
 export function Footer() {
   return (
     <footer className="border-t border-border-subtle bg-white">
-      <div className="mx-auto flex max-w-container-max-width flex-col gap-2 px-6 py-8 text-body-sm text-text-muted sm:flex-row sm:justify-between">
-        <p>© 2026 Panmoa Teslaコミュニティ</p>
+      <div className="mx-auto flex max-w-container-max-width flex-col gap-3 px-6 py-8 text-body-sm text-text-muted sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <p>© 2026 Panmoa Teslaコミュニティ</p>
+          <nav className="flex items-center gap-3">
+            <a href="/terms" className="hover:text-on-surface hover:underline">
+              利用規約
+            </a>
+            <a
+              href="/privacy"
+              className="hover:text-on-surface hover:underline"
+            >
+              プライバシーポリシー
+            </a>
+          </nav>
+        </div>
         <div className="flex items-center gap-3">
           <p>オーナーの実体験を、次の意思決定へ。</p>
           <a

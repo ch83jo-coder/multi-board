@@ -28,10 +28,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly",
     priority: 0.9,
   };
+  const terms: MetadataRoute.Sitemap[number] = {
+    url: absoluteUrl("/terms"),
+    changeFrequency: "yearly",
+    priority: 0.3,
+  };
+  const privacy: MetadataRoute.Sitemap[number] = {
+    url: absoluteUrl("/privacy"),
+    changeFrequency: "yearly",
+    priority: 0.3,
+  };
   if (!hasSupabaseEnv()) {
     return [
       home,
       chargingCalculator,
+      terms,
+      privacy,
       ...demoBoards
         .filter((board) => board.is_active)
         .map((board) => ({
@@ -53,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(
       `[sitemap:boards] Supabase query failed (${boardsError.code}): ${boardsError.message}`,
     );
-    return [home, chargingCalculator];
+    return [home, chargingCalculator, terms, privacy];
   }
 
   const activeBoards = (boards ?? []) as SitemapBoard[];
@@ -66,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  if (!activeBoards.length) return [home, chargingCalculator];
+  if (!activeBoards.length) return [home, chargingCalculator, terms, privacy];
 
   const { data: posts, error: postsError } = await supabase
     .from("posts")
@@ -82,7 +94,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(
       `[sitemap:posts] Supabase query failed (${postsError.code}): ${postsError.message}`,
     );
-    return [home, chargingCalculator, ...boardEntries];
+    return [home, chargingCalculator, terms, privacy, ...boardEntries];
   }
 
   const postEntries: MetadataRoute.Sitemap = (posts as SitemapPost[]).flatMap(
@@ -102,5 +114,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   );
 
-  return [home, chargingCalculator, ...boardEntries, ...postEntries];
+  return [
+    home,
+    chargingCalculator,
+    terms,
+    privacy,
+    ...boardEntries,
+    ...postEntries,
+  ];
 }
