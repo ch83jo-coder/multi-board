@@ -23,6 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "hourly",
     priority: 1,
   };
+  const boardList: MetadataRoute.Sitemap[number] = {
+    url: absoluteUrl("/boards"),
+    changeFrequency: "daily",
+    priority: 0.9,
+  };
   const chargingCalculator: MetadataRoute.Sitemap[number] = {
     url: absoluteUrl("/tools/charging-cost"),
     changeFrequency: "monthly",
@@ -41,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!hasSupabaseEnv()) {
     return [
       home,
+      boardList,
       chargingCalculator,
       terms,
       privacy,
@@ -65,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(
       `[sitemap:boards] Supabase query failed (${boardsError.code}): ${boardsError.message}`,
     );
-    return [home, chargingCalculator, terms, privacy];
+    return [home, boardList, chargingCalculator, terms, privacy];
   }
 
   const activeBoards = (boards ?? []) as SitemapBoard[];
@@ -78,7 +84,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  if (!activeBoards.length) return [home, chargingCalculator, terms, privacy];
+  if (!activeBoards.length)
+    return [home, boardList, chargingCalculator, terms, privacy];
 
   const { data: posts, error: postsError } = await supabase
     .from("posts")
@@ -94,7 +101,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(
       `[sitemap:posts] Supabase query failed (${postsError.code}): ${postsError.message}`,
     );
-    return [home, chargingCalculator, terms, privacy, ...boardEntries];
+    return [
+      home,
+      boardList,
+      chargingCalculator,
+      terms,
+      privacy,
+      ...boardEntries,
+    ];
   }
 
   const postEntries: MetadataRoute.Sitemap = (posts as SitemapPost[]).flatMap(
@@ -116,6 +130,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     home,
+    boardList,
     chargingCalculator,
     terms,
     privacy,

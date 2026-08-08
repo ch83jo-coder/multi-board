@@ -476,20 +476,22 @@ export async function getBoardPosts(
   return data as unknown as Post[];
 }
 
-export async function getBoardPostCount(boardId: string): Promise<number> {
-  if (!hasSupabaseEnv())
-    return demoPosts.filter((post) => post.board_id === boardId).length;
-  const supabase = await createClient();
-  const { count, error } = await supabase
-    .from("posts")
-    .select("*", { count: "exact", head: true })
-    .eq("board_id", boardId);
-  if (error) {
-    logQueryError("getBoardPostCount", error);
-    return 0;
-  }
-  return count ?? 0;
-}
+export const getBoardPostCount = cache(
+  async (boardId: string): Promise<number> => {
+    if (!hasSupabaseEnv())
+      return demoPosts.filter((post) => post.board_id === boardId).length;
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from("posts")
+      .select("*", { count: "exact", head: true })
+      .eq("board_id", boardId);
+    if (error) {
+      logQueryError("getBoardPostCount", error);
+      return 0;
+    }
+    return count ?? 0;
+  },
+);
 
 export async function getBoardBestPosts(boardId: string): Promise<Post[]> {
   if (!hasSupabaseEnv())

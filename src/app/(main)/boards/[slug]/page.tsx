@@ -30,9 +30,13 @@ export async function generateMetadata({
   if (!board) return { title: "掲示板", robots: { index: false } };
 
   const parsedPage = Number(query.page ?? 1);
-  const page = Number.isFinite(parsedPage)
+  const requestedPage = Number.isFinite(parsedPage)
     ? Math.max(1, Math.floor(parsedPage))
     : 1;
+  // 範囲外の page は本文と同じく最終ページに丸め、重複 URL を canonical で束ねる
+  const total = await getBoardPostCount(board.id);
+  const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+  const page = Math.min(requestedPage, pages);
   const canonical =
     page > 1 ? `/boards/${slug}?page=${page}` : `/boards/${slug}`;
   const title = `${board.name}掲示板`;
