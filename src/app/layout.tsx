@@ -1,6 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Hanken_Grotesk, Inter, Noto_Sans_JP } from "next/font/google";
+import { NativeValidationMessages } from "@/components/forms/native-validation-messages";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   absoluteUrl,
@@ -86,10 +87,7 @@ export default function RootLayout({
       className={`${inter.variable} ${hanken.variable} ${notoSansJp.variable}`}
     >
       <head>
-        <meta
-          name="google-adsense-account"
-          content="ca-pub-2335270056121269"
-        />
+        <meta name="google-adsense-account" content="ca-pub-2335270056121269" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -108,6 +106,7 @@ export default function RootLayout({
       </head>
       <body>
         <JsonLd id="website-json-ld" data={websiteStructuredData} />
+        <NativeValidationMessages />
         {children}
         <Analytics />
       </body>

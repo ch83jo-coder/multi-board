@@ -24,6 +24,7 @@ export function BoardForm({ board }: { board?: Board }) {
         placeholder="board-slug"
         defaultValue={board?.slug}
         pattern="[a-z0-9-]+"
+        title="半角小文字の英数字とハイフンのみ使用できます。"
         required
       />
       <Input
