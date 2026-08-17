@@ -48,7 +48,6 @@ export default async function HomePage({
     page === requestedPage ? requestedPosts : await getHomePosts(sort, page);
   return (
     <div className="min-w-0 space-y-6">
-      <Hero boards={boards} isAuthenticated={Boolean(viewer)} />
       <section className="space-y-3 md:hidden" aria-labelledby="mobile-boards">
         <div className="flex items-center justify-between">
           <h2 id="mobile-boards" className="font-headline-md text-headline-md">
@@ -63,6 +62,7 @@ export default async function HomePage({
         </div>
         <BoardLinkGrid boards={boards} />
       </section>
+      <Hero boards={boards} isAuthenticated={Boolean(viewer)} />
       <div className="flex items-center border-b border-border-subtle pb-4">
         <div className="inline-flex rounded-lg bg-muted p-1">
           {sortTabs.map((tab) => (
